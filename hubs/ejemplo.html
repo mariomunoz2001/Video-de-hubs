@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Café Aromo · Hub</title>
+<style>
+:root{--p:#6f3b1e;--s:#e8a33d;--bg:#fbf6ef}
+*{box-sizing:border-box;margin:0}
+body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:#2b1a10;padding-bottom:40px}
+header{background:linear-gradient(160deg,var(--p),#3d1f0e);color:#fff;text-align:center;padding:44px 24px 36px;border-radius:0 0 32px 32px}
+.logo{width:92px;height:92px;border-radius:50%;background:#fff;margin:0 auto 14px;display:grid;place-items:center;font-size:44px}
+h1{font-size:26px} header p{opacity:.85;margin-top:6px;font-size:15px}
+.btns{display:grid;gap:12px;padding:22px 20px 6px}
+.btn{display:flex;align-items:center;gap:14px;padding:16px 18px;border-radius:16px;background:#fff;color:inherit;text-decoration:none;font-weight:600;box-shadow:0 4px 14px rgba(80,40,10,.08)}
+.btn i{font-style:normal;width:40px;height:40px;border-radius:12px;display:grid;place-items:center;background:var(--s);font-size:20px}
+.btn.wa i{background:#25d366}
+section{padding:26px 20px 0}
+h2{font-size:20px;margin-bottom:12px;color:var(--p)}
+ul{list-style:none;background:#fff;border-radius:18px;padding:6px 16px;box-shadow:0 4px 14px rgba(80,40,10,.08)}
+li{display:flex;justify-content:space-between;align-items:center;padding:14px 0;border-bottom:1px solid #f0e6da}
+li:last-child{border:0} li small{display:block;color:#8a7260;margin-top:2px;font-weight:400} li span{font-weight:700;color:var(--p)}
+.mapa{height:170px;border-radius:18px;background:repeating-linear-gradient(45deg,#e9efe3 0 14px,#dfe8d7 14px 28px);display:grid;place-items:center;font-size:40px;margin-bottom:12px}
+.horario{background:#fff;border-radius:18px;padding:16px;margin-top:12px;line-height:1.7;box-shadow:0 4px 14px rgba(80,40,10,.08)}
+footer{text-align:center;color:#8a7260;font-size:13px;margin-top:30px}
+</style></head><body>
+<header><div class="logo">☕</div><h1>Café Aromo</h1><p>Café de especialidad · Concepción</p></header>
+<div class="btns">
+ <a class="btn" href="#carta"><i>📖</i>Ver la carta</a>
+ <a class="btn wa" href="https://wa.me/56912345678"><i>💬</i>Pedir por WhatsApp</a>
+ <a class="btn" href="https://maps.google.com/?q=Barros+Arana+Concepcion"><i>📍</i>Cómo llegar</a>
+ <a class="btn" href="https://instagram.com/cafearomo.cl"><i>📷</i>@cafearomo.cl</a>
+</div>
+<section id="carta"><h2>Carta · Cafés</h2><ul><li><div><b>Espresso</b><small>Doble, intenso</small></div><span>$2.200</span></li><li><div><b>Capuccino</b><small>Con canela</small></div><span>$2.900</span></li><li><div><b>Latte vainilla</b><small>Leche cremosa</small></div><span>$3.200</span></li><li><div><b>Flat white</b><small>Dos shots</small></div><span>$3.100</span></li><li><div><b>Cold brew</b><small>12 h de infusión</small></div><span>$3.400</span></li><li><div><b>Chocolate caliente</b><small>Belga</small></div><span>$3.300</span></li></ul></section>
+<section><h2>Carta · Para acompañar</h2><ul><li><div><b>Kuchen de nuez</b><small>Receta de la casa</small></div><span>$3.500</span></li><li><div><b>Cheesecake frambuesa</b><small>Porción</small></div><span>$3.900</span></li><li><div><b>Croissant almendras</b><small>Horneado hoy</small></div><span>$2.800</span></li><li><div><b>Tostada palta</b><small>Pan de masa madre</small></div><span>$4.600</span></li><li><div><b>Sándwich ave pimentón</b><small>Pan ciabatta</small></div><span>$5.200</span></li><li><div><b>Brownie</b><small>Con helado</small></div><span>$3.600</span></li></ul></section>
+<section id="ubicacion"><h2>Ubicación</h2><div class="mapa">📍</div><p>Barros Arana 1234, Concepción</p>
+<div class="horario"><b>Horario</b><br>Lun–Vie 8:00–20:00<br>Sáb–Dom 9:00–21:00</div></section>
+<footer>Hub creado por SmartTap</footer>
+</body></html>

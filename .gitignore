@@ -1,0 +1,8 @@
+node_modules/
+.tmp/
+capturas/*
+salida/*
+!capturas/.gitkeep
+!salida/.gitkeep
+musica/*
+!musica/.gitkeep
