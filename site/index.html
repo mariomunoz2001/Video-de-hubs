@@ -165,14 +165,15 @@ h2{font-size:clamp(2rem,4.4vw,3.3rem);line-height:1.08;font-weight:800;letter-sp
 .pbody li{display:flex;gap:10px;align-items:flex-start;font-size:.93rem;color:rgba(255,255,255,.9)}
 .pbody li .ico{color:var(--mint);margin-top:.25em}
 .pvis{position:relative;display:grid;place-items:center;animation:pop .7s var(--ease)}
+.pvis video{width:100%;max-width:260px;aspect-ratio:4/5;object-fit:cover;border-radius:24px;background:#0a1322;box-shadow:0 30px 50px -20px rgba(0,0,0,.6)}
 .pvis svg{width:100%;max-width:280px;height:auto;filter:drop-shadow(0 30px 30px rgba(0,0,0,.4));animation:float 5s ease-in-out infinite}
 @keyframes rise{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
 @keyframes pop{from{opacity:0;transform:scale(.88) rotate(-4deg)}to{opacity:1;transform:none}}
 @keyframes float{50%{transform:translateY(-10px) rotate(1.5deg)}}
-@media(max-width:940px){.prod{grid-template-columns:1fr}.panel{grid-template-columns:1fr;padding:32px 26px}.pvis{order:-1}.pvis svg{max-width:210px}}
+@media(max-width:940px){.prod{grid-template-columns:1fr}.panel{grid-template-columns:1fr;padding:32px 26px}.pvis{order:-1}.pvis svg,.pvis video{max-width:210px}}
 
 /* Cómo funciona */
-.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;counter-reset:s;position:relative}
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:20px;counter-reset:s;position:relative}
 .step{background:rgba(255,255,255,.06);box-shadow:inset 0 0 0 1px rgba(255,255,255,.12);border-radius:var(--r);padding:34px 30px 38px;position:relative;transition:transform .45s var(--ease),background .4s}
 .step:hover{transform:translateY(-8px);background:rgba(255,255,255,.1)}
 .step .big{font-size:4.2rem;font-weight:800;line-height:1;color:transparent;-webkit-text-stroke:2px var(--amber);margin-bottom:18px}
@@ -181,7 +182,6 @@ h2{font-size:clamp(2rem,4.4vw,3.3rem);line-height:1.08;font-weight:800;letter-sp
 .feat{display:flex;flex-wrap:wrap;gap:12px;margin-top:48px}
 .feat .chip{background:rgba(255,255,255,.08);color:#fff;box-shadow:inset 0 0 0 1px rgba(255,255,255,.16)}
 .feat .chip .ico{color:var(--amber)}
-@media(max-width:860px){.steps{grid-template-columns:1fr}}
 
 /* Demo */
 .demo{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center}
@@ -210,6 +210,18 @@ h2{font-size:clamp(2rem,4.4vw,3.3rem);line-height:1.08;font-weight:800;letter-sp
 .card p{color:var(--muted);font-size:.93rem}
 @media(max-width:980px){.why{grid-template-columns:1fr 1fr}}
 @media(max-width:560px){.why{grid-template-columns:1fr}}
+
+/* Catálogo */
+.cat-h{font-size:1.5rem;margin:44px 0 18px}
+.cat{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:18px}
+.cat article{display:flex;flex-direction:column;gap:12px;padding:28px;border-radius:var(--r);background:rgba(255,255,255,.06);box-shadow:inset 0 0 0 1px rgba(255,255,255,.12);transition:transform .45s var(--ease),background .4s}
+.cat article:hover{transform:translateY(-6px);background:rgba(255,255,255,.1)}
+.cat h4{font-size:1.2rem;line-height:1.25}
+.cat p{color:rgba(255,255,255,.72);font-size:.95rem}
+.badge{align-self:flex-start;margin-top:auto;padding:6px 14px;border-radius:100px;background:rgba(255,176,46,.16);color:var(--amber);font-size:.78rem;font-weight:700}
+.post{margin-top:52px;padding:34px 32px;border-radius:var(--r);background:linear-gradient(135deg,rgba(255,176,46,.2),rgba(53,224,180,.12));box-shadow:inset 0 0 0 1px rgba(255,255,255,.16)}
+.post h3{font-size:clamp(1.4rem,3vw,1.9rem);margin-bottom:10px}
+.post p{color:rgba(255,255,255,.82);max-width:46em}
 
 /* FAQ */
 .faq{max-width:820px;display:grid;gap:12px}
@@ -307,6 +319,7 @@ footer .logo{color:var(--ink)}
       <li><a href="#productos">Productos</a></li>
       <li><a href="#como">Cómo funciona</a></li>
       <li><a href="#demo">Demo</a></li>
+      <li><a href="#catalogo">Catálogo</a></li>
       <li><a href="#faq">Preguntas</a></li>
     </ul>
     <a class="btn btn-primary" data-contact href="#contacto">Cotizar</a>
@@ -321,11 +334,12 @@ footer .logo{color:var(--ink)}
     <div>
       <span class="eyebrow rv"><i></i>Hecho en Concepción, Chile</span>
       <h1 class="rv" style="--d:.08s">Tu local, a un <em>toque</em> de distancia.</h1>
-      <p class="lead rv" style="--d:.16s">Creamos la página de tu negocio y la conectamos a stickers, tarjetas, stands y llaveros NFC. Tus clientes acercan el celular y ven tu carta, tu ubicación, tu WhatsApp y tu Instagram. Sin descargar nada.</p>
+      <p class="lead rv" style="--d:.16s">Creamos la página de tu negocio y la conectamos a stickers, tarjetas, stands y llaveros NFC. Tus clientes acercan el celular y ven tu carta, tu ubicación, tu WhatsApp y tu Instagram. Sin app y sin buscar nada.</p>
       <div class="cta-row rv" style="--d:.24s">
         <a class="btn btn-primary" data-contact href="#contacto"><svg class="ico"><use href="#i-wa"/></svg>Quiero mi hub</a>
         <a class="btn btn-ghost" href="#como">Ver cómo funciona</a>
       </div>
+      <p class="rv" style="--d:.28s;display:flex;align-items:center;gap:10px;margin:-8px 0 26px;font-weight:600;color:#fff"><svg class="ico" style="color:var(--mint)"><use href="#i-check"/></svg>Pago único. Sin suscripción.</p>
       <div class="chips rv" style="--d:.32s">
         <span class="chip"><svg class="ico"><use href="#i-book"/></svg>Carta</span>
         <span class="chip"><svg class="ico"><use href="#i-pin"/></svg>Ubicación</span>
@@ -358,8 +372,8 @@ footer .logo{color:var(--ink)}
   <div class="wrap">
     <div class="sec-head rv">
       <span class="kicker">Productos</span>
-      <h2>Un chip para cada forma de atender.</h2>
-      <p>Todos se enlazan a la página que creamos para tu negocio. Elige el que mejor calce con cómo trabajas.</p>
+      <h2>Tres formatos, misma experiencia.</h2>
+      <p>Eliges dónde poner cada uno según cómo atiendes. Todos se programan hacia tu hub, o hacia donde tú decidas.</p>
     </div>
     <div class="prod rv">
       <div class="tabs" role="tablist" aria-label="Productos NFC" id="tabs"></div>
@@ -373,14 +387,16 @@ footer .logo{color:var(--ink)}
   <div class="wrap">
     <div class="sec-head rv">
       <span class="kicker">Cómo funciona</span>
-      <h2>De tu negocio a un toque, en tres pasos.</h2>
-      <p>Nosotros nos encargamos de todo el proceso técnico. Tú solo nos cuentas qué quieres mostrar.</p>
+      <h2>De tu negocio a un toque, en cuatro pasos.</h2>
+      <p>NFC significa proximidad: el celular y el chip se reconocen a pocos centímetros, sin cables ni configuraciones. El chip no lleva batería ni pantalla, solo guarda un enlace, y ese enlace lo programamos nosotros. Todos tus chips apuntan al mismo lugar: tu hub.</p>
     </div>
     <div class="steps">
-      <article class="step rv"><div class="big">01</div><h3>Creamos tu hub</h3><p>Una página rápida y con tu marca, con tu carta o servicios, ubicación, WhatsApp, Instagram y lo que necesites. Publicada en Cloudflare para que cargue al instante.</p></article>
-      <article class="step rv" style="--d:.1s"><div class="big">02</div><h3>Lo conectamos al NFC</h3><p>Programamos el chip con el enlace de tu hub y lo dejamos listo: bajo el sticker de tu marca, en una tarjeta, un stand o un llavero.</p></article>
-      <article class="step rv" style="--d:.2s"><div class="big">03</div><h3>Tus clientes tocan</h3><p>Acercan el celular y se abre tu página. Sin apps, sin escribir direcciones, sin perder pedidos por no encontrar tu carta.</p></article>
+      <article class="step rv"><div class="big">01</div><h3>Armamos tu hub</h3><p>Carta vertical, WhatsApp, Instagram, reseñas, ubicación y horario, con los colores de tu marca. Publicado en Cloudflare para que cargue al instante.</p></article>
+      <article class="step rv" style="--d:.08s"><div class="big">02</div><h3>Programamos los chips</h3><p>Cada sticker, tarjeta o placa se programa con el enlace de tu hub. Da lo mismo cuál toque el cliente: la experiencia es una sola.</p></article>
+      <article class="step rv" style="--d:.16s"><div class="big">03</div><h3>Los pones a la vista</h3><p>Mesas, mostrador, caja, vitrina o packaging. Tu cliente acerca el celular, se abre tu hub y ve la carta, pide, te sigue o deja su reseña.</p></article>
+      <article class="step rv" style="--d:.24s"><div class="big">04</div><h3>Se mantiene al día</h3><p>Si cambias un precio o un plato, actualizamos el hub y el mismo chip ya muestra lo nuevo. No hay que reimprimir nada.</p></article>
     </div>
+    <p class="rv" style="margin-top:28px;color:rgba(255,255,255,.65);font-size:.95rem;max-width:44em">Los celulares recientes lo leen al instante. Para los más antiguos, la placa de mesa trae un QR que hace lo mismo.</p>
     <div class="feat rv">
       <span class="chip"><svg class="ico"><use href="#i-book"/></svg>Carta o catálogo</span>
       <span class="chip"><svg class="ico"><use href="#i-pin"/></svg>Cómo llegar</span>
@@ -407,19 +423,44 @@ footer .logo{color:var(--ink)}
   </div>
 </section>
 
-<!-- Por qué -->
+<!-- Lo que ganas -->
 <section class="sec" style="padding-top:0">
   <div class="wrap">
     <div class="sec-head rv">
-      <span class="kicker">Por qué SmartTap</span>
-      <h2>Simple para ti, cómodo para tus clientes.</h2>
+      <span class="kicker">Lo que ganas</span>
+      <h2>Menos pasos para tu cliente, más resultados para ti.</h2>
     </div>
     <div class="why">
-      <article class="card rv"><div class="ic"><svg class="ico"><use href="#i-phone"/></svg></div><h3>Sin apps</h3><p>Funciona directo desde el celular. Acercar y listo.</p></article>
-      <article class="card rv" style="--d:.08s"><div class="ic"><svg class="ico"><use href="#i-brand"/></svg></div><h3>Con tu marca</h3><p>Colores, logo y estilo de tu local, tanto en la página como en el producto.</p></article>
-      <article class="card rv" style="--d:.16s"><div class="ic"><svg class="ico"><use href="#i-bolt"/></svg></div><h3>Rápido</h3><p>Páginas livianas publicadas en Cloudflare, listas en un instante.</p></article>
-      <article class="card rv" style="--d:.24s"><div class="ic"><svg class="ico"><use href="#i-globe"/></svg></div><h3>Todo en un lugar</h3><p>Carta, ubicación, WhatsApp, Instagram y reseñas en un solo enlace.</p></article>
+      <article class="card rv"><div class="ic"><svg class="ico"><use href="#i-book"/></svg></div><h3>Una carta siempre al día</h3><p>Cambias precios y platos cuando quieras. Lo impreso no envejece porque el chip siempre abre lo último.</p></article>
+      <article class="card rv" style="--d:.08s"><div class="ic"><svg class="ico"><use href="#i-wa"/></svg></div><h3>Pedidos directo a tu WhatsApp</h3><p>Tu cliente ve la carta y pide con un botón, sin intermediarios y sin escribirte desde cero.</p></article>
+      <article class="card rv" style="--d:.16s"><div class="ic"><svg class="ico"><use href="#i-star"/></svg></div><h3>Más reseñas en Google</h3><p>El botón de reseñas queda a un tap, justo cuando tu cliente está en tu local y contento.</p></article>
+      <article class="card rv" style="--d:.24s"><div class="ic"><svg class="ico"><use href="#i-globe"/></svg></div><h3>Todo a un tap</h3><p>Carta, Instagram, ubicación y horario en un solo lugar. Sin apps y sin que te tengan que buscar.</p></article>
     </div>
+  </div>
+</section>
+
+<!-- Catálogo -->
+<section class="sec dark" id="catalogo">
+  <div class="wrap">
+    <div class="sec-head rv">
+      <span class="kicker">Catálogo</span>
+      <h2>Todo con pago único.</h2>
+      <p>Lo que ves aquí se paga una sola vez: sin suscripción ni mensualidades. Una inversión que se queda contigo. Escríbeme y te preparo una cotización según lo que necesites.</p>
+    </div>
+    <h3 class="cat-h rv">Productos</h3>
+    <div class="cat rv">
+      <article><h4>Placa de mesa NFC + QR</h4><p>Se para sola en la mesa o en la caja. Tiene chip NFC para tocar y código QR para escanear.</p><span class="badge">Pago único, sin suscripción</span></article>
+      <article><h4>Tarjeta de reseñas de Google</h4><p>Solo NFC, sin QR. Pensada para que el garzón la entregue junto con la cuenta y el cliente deje su reseña con un tap.</p><span class="badge">Pago único, sin suscripción</span></article>
+      <article><h4>Chip NFC (sticker)</h4><p>Se pega en la mesa, en la carta o en el packaging y se programa hacia tu hub o hacia donde tú quieras.</p><span class="badge">Pago único, sin suscripción</span></article>
+      <article><h4>Llavero NFC</h4><p>Con chip dentro, enlazado a tu Instagram. Ideal para regalar o llevar tu marca a todos lados.</p><span class="badge">Pago único, sin suscripción</span></article>
+    </div>
+    <h3 class="cat-h rv">Servicios</h3>
+    <div class="cat rv">
+      <article><h4>Hub de links</h4><p>Una página con tu carta, WhatsApp, Instagram, reseñas, ubicación y horario. El precio es fijo: no cambia según lo que lleve tu hub.</p><span class="badge">Pago único, sin suscripción</span></article>
+      <article><h4>Diseño de menú</h4><p>Carta vertical pensada para el celular, con el estilo de tu marca.</p><span class="badge">Pago único, sin suscripción</span></article>
+    </div>
+    <div class="cta-row rv" style="margin:36px 0 0"><a class="btn btn-primary" data-contact data-msg="cotizar" href="#contacto"><svg class="ico"><use href="#i-wa"/></svg>Cotizar por WhatsApp</a></div>
+    <div class="post rv"><h3>Sigo contigo después de la compra</h3><p>Si algo llega a fallar, estoy atento y puedes contar conmigo. Y si más adelante quieres hacer un cambio, lo conversamos en una reunión y ahí vemos el valor según lo que quieras modificar.</p></div>
   </div>
 </section>
 
@@ -431,12 +472,12 @@ footer .logo{color:var(--ink)}
       <h2>Lo que más nos preguntan.</h2>
     </div>
     <div class="faq rv">
-      <details><summary>¿Mis clientes necesitan instalar una app?</summary><p>No. El celular lee el chip y abre directamente la página de tu negocio en el navegador.</p></details>
-      <details><summary>¿Funciona en iPhone y en Android?</summary><p>Sí. Los iPhone desde el XS y la gran mayoría de los Android actuales leen NFC sin abrir ninguna aplicación.</p></details>
-      <details><summary>¿Y si el celular del cliente no tiene NFC?</summary><p>Los stands de mostrador incluyen además un código QR, así nadie se queda fuera.</p></details>
-      <details><summary>¿Puedo cambiar mi carta o mis datos después?</summary><p>Sí. El chip siempre apunta a la misma dirección, así que cuando cambia tu carta, horario o promociones actualizamos la página y la placa sigue funcionando igual.</p></details>
-      <details><summary>¿Cuánto cuesta y cuánto demora?</summary><p>Depende de los productos que elijas y de cuántas unidades necesites. Escríbenos y te enviamos una cotización con plazos.</p></details>
-      <details><summary>¿Trabajan fuera de Concepción?</summary><p>Estamos en Concepción, pero consúltanos por tu ciudad y vemos cómo coordinar.</p></details>
+      <details><summary>¿Mis clientes necesitan instalar una app?</summary><p>No. El celular lee el chip y abre directamente tu hub en el navegador.</p></details>
+      <details><summary>¿Funciona en iPhone y en Android?</summary><p>Sí. Los celulares recientes lo leen al instante. Para los más antiguos, la placa de mesa trae un QR que hace lo mismo.</p></details>
+      <details><summary>¿Hay mensualidades?</summary><p>No. Todo se paga una sola vez: sin suscripción.</p></details>
+      <details><summary>¿Puedo cambiar mi carta o mis precios después?</summary><p>Sí. El chip siempre apunta al mismo enlace, así que si cambias un precio o un plato actualizamos el hub y el mismo chip ya muestra lo nuevo. Si quieres un cambio mayor, lo conversamos en una reunión y vemos el valor según lo que quieras modificar.</p></details>
+      <details><summary>¿Y si algo falla después de la compra?</summary><p>Sigo contigo: estoy atento y puedes contar conmigo.</p></details>
+      <details><summary>¿Cuánto cuesta?</summary><p>Depende de los productos y las unidades que necesites. El hub tiene precio fijo, no cambia según lo que lleve. Escríbeme y te preparo una cotización.</p></details>
     </div>
   </div>
 </section>
@@ -445,10 +486,10 @@ footer .logo{color:var(--ink)}
 <section class="sec" id="contacto" style="padding-top:20px">
   <div class="wrap">
     <div class="cta rv">
-      <h2>¿Listo para que te encuentren con un toque?</h2>
-      <p>Cuéntanos qué negocio tienes y te mostramos cómo se vería tu hub con tu marca.</p>
+      <h2>¿Lo implementamos en tu local?</h2>
+      <p>Cuéntame qué tienes hoy: carta, Instagram, WhatsApp. Yo armo tu hub y programo los chips para que tu cliente lo tenga todo con un tap.</p>
       <div class="cta-row">
-        <a class="btn btn-primary" data-contact href="mailto:smarttap.cl@gmail.com"><svg class="ico"><use href="#i-wa"/></svg>Escríbenos</a>
+        <a class="btn btn-primary" data-contact data-msg="reunion" href="#contacto"><svg class="ico"><use href="#i-wa"/></svg>Escribirme por WhatsApp</a>
         <a class="btn btn-ghost" href="mailto:smarttap.cl@gmail.com"><svg class="ico"><use href="#i-mail"/></svg>smarttap.cl@gmail.com</a>
       </div>
     </div>
@@ -463,11 +504,12 @@ footer .logo{color:var(--ink)}
       <ul>
         <li><a href="#productos">Productos</a></li>
         <li><a href="#como">Cómo funciona</a></li>
+        <li><a href="#catalogo">Catálogo</a></li>
         <li><a href="mailto:smarttap.cl@gmail.com">smarttap.cl@gmail.com</a></li>
         <li><a id="ig-link" href="#" hidden rel="noopener" target="_blank">Instagram</a></li>
       </ul>
     </div>
-    <p class="copy">© <span id="year">2026</span> SmartTap · Hecho en Concepción, Chile.</p>
+    <p class="copy">Chips NFC y hubs de links para negocios locales. © <span id="year">2026</span> SmartTap · Concepción, Chile.</p>
   </div>
 </footer>
 
@@ -476,18 +518,22 @@ footer .logo{color:var(--ink)}
 <script>
 /* =========================================================
    CONFIGURA AQUÍ TUS DATOS
-   - WHATSAPP: número con código de país y sin "+" ni espacios (ej. "56912345678").
+   - WHATSAPP: número con código de país y sin "+" ni espacios.
      Si lo dejas vacío, los botones de contacto usan el correo.
    - INSTAGRAM: tu usuario sin "@" (ej. "smarttap.cl"). Vacío = el enlace se oculta.
    ========================================================= */
-const WHATSAPP = "";
+const WHATSAPP = "56945294606";
 const INSTAGRAM = "";
-const MENSAJE = "Hola SmartTap, quiero información para mi negocio.";
+const MENSAJES = {
+  cotizar: "Hola, vi la página de NFC + hub para mi local y me gustaría cotizar. ¿Me puedes contar los valores y qué me conviene?",
+  reunion: "Hola, vi la página de NFC + hub para mi local y me interesa. Quiero organizar una reunión para ver los detalles y concretar la compra. ¿Cuándo podemos coordinar?"
+};
+const MENSAJE = MENSAJES.cotizar;
 const CORREO = "smarttap.cl@gmail.com";
 
 /* ---------- Contacto ---------- */
 document.querySelectorAll("[data-contact]").forEach(a => {
-  if (WHATSAPP) { a.href = `https://wa.me/${WHATSAPP}?text=${encodeURIComponent(MENSAJE)}`; a.target = "_blank"; a.rel = "noopener"; }
+  if (WHATSAPP) { a.href = `https://wa.me/${WHATSAPP}?text=${encodeURIComponent(MENSAJES[a.dataset.msg] || MENSAJE)}`; a.target = "_blank"; a.rel = "noopener"; }
   else if (a.getAttribute("href") === "#contacto" ) { /* ancla interna */ }
   else { a.href = `mailto:${CORREO}?subject=${encodeURIComponent("Consulta SmartTap")}&body=${encodeURIComponent(MENSAJE)}`; }
 });
@@ -569,24 +615,26 @@ const svgKey = `<svg viewBox="0 0 300 300" aria-hidden="true"><defs><linearGradi
   <circle cx="150" cy="224" r="70" fill="url(#gk)"/><circle cx="150" cy="224" r="70" fill="none" stroke="#fff" stroke-opacity=".35" stroke-width="3"/>
   <g fill="none" stroke="#fff" stroke-width="9"><rect x="116" y="190" width="68" height="68" rx="20"/><circle cx="150" cy="224" r="16"/></g><circle cx="174" cy="200" r="5.500" fill="#fff"/></svg>`;
 const PRODUCTOS = [
-  {n:"Sticker NFC", s:"El más versátil", tag:"Chip NTAG215", t:"Se esconde bajo tu marca", svg:svgSticker,
-   d:"Un sticker delgado que va oculto debajo del sticker con la marca de tu local. El cliente acerca el celular al logo y se abre tu página. Es el producto más transversal: sirve para casi cualquier negocio.",
-   l:["Ultra delgado, solo 0,15 mm","Se pega en mesas, muros y casi cualquier superficie","Queda invisible bajo tu logo o diseño","Enlazado a tu hub personalizado"]},
-  {n:"Tarjeta de reseñas", s:"Para el equipo de sala", tag:"NFC + reseñas Google", t:"Más reseñas al entregar la cuenta", svg:svgCard,
-   d:"Pensada para garzones y atención en sala: al entregar la cuenta, el cliente acerca el celular a la tarjeta y llega directo a dejar su reseña en Google. Más reseñas, sin pedirlo con torpeza.",
-   l:["Tamaño tarjeta, cabe en la libreta de cuenta","Lleva al cliente directo al formulario de reseña","Chip de alta memoria y antena de lectura rápida","Acabado resistente y duradero"]},
-  {n:"Stand de mostrador", s:"Siempre a la vista", tag:"NFC + QR", t:"Déjalo en el mostrador", svg:svgStand,
-   d:"Un soporte de acrílico para el mostrador o cualquier stand. Incluye chip NFC y código QR, así que funciona con todos los celulares. Los clientes se sirven solos: carta, reseñas o redes.",
-   l:["Para mostrador, caja o mesas","NFC y QR en un mismo producto","Ideal para carta, reseñas o Instagram","Presencia constante, sin que nadie lo ofrezca"]},
+  {n:"Chip NFC (sticker)", s:"El más versátil", tag:"Chip NTAG215", t:"Se esconde bajo tu marca", svg:svgSticker,
+   d:"Redondo y discreto. Se pega en la mesa, en la carta impresa, en la caja o en el packaging, y se programa hacia tu hub o hacia donde tú quieras. Puede ir oculto bajo el sticker con la marca de tu local.",
+   l:["Ultra delgado, solo 0,15 mm","Se pega en mesas, muros y casi cualquier superficie","Queda invisible bajo tu logo o diseño","Pago único, sin suscripción"]},
+  {n:"Tarjeta de reseñas", s:"Para el equipo de sala", tag:"Solo NFC · sin QR", t:"Más reseñas al entregar la cuenta", svg:svgCard, video:"tarjeta",
+   d:"Pensada para garzones y atención en sala: el garzón la entrega junto con la cuenta y el cliente deja su reseña en Google con un tap.",
+   l:["Tamaño tarjeta, cabe en la libreta de cuenta","Lleva al cliente directo a dejar su reseña","Chip de alta memoria y antena de lectura rápida","Pago único, sin suscripción"]},
+  {n:"Placa de mesa", s:"Siempre a la vista", tag:"NFC + QR", t:"Se para sola en tu mesa o caja", svg:svgStand, video:"placa",
+   d:"Un soporte para la mesa, el mostrador o la caja. Trae NFC para tocar y QR para escanear, así nadie se queda sin poder usarla. Los clientes se sirven solos: carta, reseñas o redes.",
+   l:["Para mesas, mostrador o caja","NFC y QR en un mismo producto","Ideal para carta, reseñas o Instagram","Pago único, sin suscripción"]},
   {n:"Llavero NFC", s:"Para llevar la marca", tag:"NFC + Instagram", t:"Tu Instagram en un toque", svg:svgKey,
    d:"Un llavero con chip NFC dentro, enlazado a tu Instagram. Lo usan sobre todo los locales que lo ocupan de forma más personal: para regalar, vender o llevar la marca a todos lados.",
-   l:["Chip NFC integrado","Enlazado al Instagram del negocio","Perfecto como regalo o merch","Ligero, resistente y fácil de personalizar"]}
+   l:["Chip NFC integrado","Enlazado al Instagram del negocio","Perfecto como regalo o merch","Pago único, sin suscripción"]}
 ];
 const tabs = document.getElementById("tabs"), panel = document.getElementById("panel");
 tabs.innerHTML = PRODUCTOS.map((p, i) => `<button class="tab" role="tab" aria-selected="${i===0}" data-i="${i}"><span class="n">${i+1}</span><span><b>${p.n}</b><small>${p.s}</small></span></button>`).join("");
 function showProd(i) {
   const p = PRODUCTOS[i];
-  panel.innerHTML = `<div class="pbody"><span class="tag">${p.tag}</span><h3>${p.t}</h3><p>${p.d}</p><ul>${p.l.map(x => `<li><svg class="ico"><use href="#i-check"/></svg>${x}</li>`).join("")}</ul></div><div class="pvis">${p.svg}</div>`;
+  panel.innerHTML = `<div class="pbody"><span class="tag">${p.tag}</span><h3>${p.t}</h3><p>${p.d}</p><ul>${p.l.map(x => `<li><svg class="ico"><use href="#i-check"/></svg>${x}</li>`).join("")}</ul></div><div class="pvis">${p.video ? `<video src="media/${p.video}.mp4" poster="media/${p.video}.jpg" controls playsinline preload="metadata" aria-label="Video: ${p.n}"></video>` : p.svg}</div>`;
+  const v = panel.querySelector("video");
+  if (v) v.addEventListener("error", () => { v.parentNode.innerHTML = p.svg; }, true);
   tabs.querySelectorAll(".tab").forEach((t, k) => t.setAttribute("aria-selected", k === i));
 }
 tabs.addEventListener("click", e => { const t = e.target.closest(".tab"); if (t) { clearInterval(rot); showProd(+t.dataset.i); } });
