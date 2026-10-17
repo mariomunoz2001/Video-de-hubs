@@ -1,32 +1,66 @@
 import React from 'react';
 
-/** Mano ilustrada que apunta (trazo azul como la mascota). La yema del índice está en (PUNTA_X, PUNTA_Y). */
-export const PUNTA_X = 112;
-export const PUNTA_Y = 16;
-export const MANO_W = 380;
-export const MANO_H = 980;
+/** Mano ilustrada vista desde el dorso, apuntando con el índice (trazo azul como la mascota).
+ *  La yema del índice queda en (PUNTA_X, PUNTA_Y). */
+export const PUNTA_X = 120;
+export const PUNTA_Y = 20;
+export const MANO_W = 400;
+export const MANO_H = 940;
 
-export const Mano: React.FC<{tinta: string; piel?: string; manga: string; puno: string}> = ({tinta, piel = '#F6D2B0', manga, puno}) => (
-  <svg viewBox="0 0 380 980" width={MANO_W} height={MANO_H} style={{display: 'block', overflow: 'visible'}}>
-    <g stroke={tinta} strokeWidth="7" strokeLinejoin="round" strokeLinecap="round">
-      {/* antebrazo / manga */}
-      <path d="M168 520 L300 488 L392 980 L222 980 Z" fill={manga} />
-      <path d="M160 512 L304 478 L316 540 L172 576 Z" fill={puno} />
-      {/* índice (detrás de la palma) */}
-      <path d="M92 346 L88 70 C86 10 140 4 142 62 L156 340 Z" fill={piel} />
-      {/* palma */}
-      <path d="M146 300 C150 248 214 232 262 252 C306 270 318 330 310 388 C302 450 268 500 220 508 C176 514 146 474 142 420 Z" fill={piel} />
-      <path d="M100 56 C100 30 130 28 131 52 L130 84 C118 90 106 88 101 82 Z" fill="#FBE6D3" strokeWidth="4" />
-      {/* dedos doblados */}
-      <rect x="128" y="300" width="112" height="56" rx="28" fill={piel} />
-      <rect x="134" y="350" width="104" height="54" rx="27" fill={piel} />
-      <rect x="142" y="398" width="92" height="52" rx="26" fill={piel} />
-      {/* pulgar */}
-      <path d="M150 300 C120 290 98 312 104 340 C110 366 150 372 178 360 C196 352 198 332 186 320" fill={piel} />
-      {/* pliegues */}
-      <path d="M262 300 C272 330 274 370 266 400" fill="none" strokeWidth="5" opacity=".5" />
-      <path d="M96 250 Q118 244 140 250" fill="none" strokeWidth="4" opacity=".55" />
-      <path d="M94 170 Q116 164 138 170" fill="none" strokeWidth="4" opacity=".55" />
+// Silueta continua: índice + puño + muñeca
+const SILUETA =
+  'M120 20C99 20 88 36 88 62L92 282C70 300 56 338 64 378C72 414 102 434 132 442C136 472 142 500 150 528L292 528C300 480 314 430 314 380C314 340 304 312 286 302C272 292 256 290 246 294C236 282 216 278 200 286C188 290 178 290 168 284L152 62C152 36 142 20 120 20Z';
+
+export const Mano: React.FC<{tinta: string; piel?: string; sombra?: string; manga: string; puno: string}> = ({
+  tinta,
+  piel = '#F3C9A2',
+  sombra = 'rgba(176,96,60,.28)',
+  manga,
+  puno,
+}) => (
+  <svg viewBox="0 0 400 940" width={MANO_W} height={MANO_H} style={{display: 'block', overflow: 'visible'}}>
+    <defs>
+      <clipPath id="mano-clip"><path d={SILUETA} /></clipPath>
+    </defs>
+    {/* manga */}
+    <path d="M138 566L306 566C334 690 362 810 384 940L192 940C170 816 150 694 138 566Z" fill={manga} stroke={tinta} strokeWidth="7" strokeLinejoin="round" />
+    <path d="M200 640C230 700 250 790 258 900" fill="none" stroke={tinta} strokeWidth="4" opacity=".35" strokeLinecap="round" />
+    <path d="M280 620C300 700 318 790 328 880" fill="none" stroke={tinta} strokeWidth="4" opacity=".25" strokeLinecap="round" />
+
+    {/* mano */}
+    <path d={SILUETA} fill={piel} />
+    <g clipPath="url(#mano-clip)">
+      {/* sombra lateral derecha y bajo los nudillos */}
+      <path d="M314 360C318 430 304 490 292 540L258 540C272 480 284 420 280 360Z" fill={sombra} />
+      <path d="M160 380C200 398 256 398 316 384L316 420C260 432 200 432 150 414Z" fill={sombra} opacity=".55" />
+      <path d="M140 60C142 120 146 200 156 284L168 284L152 62Z" fill={sombra} opacity=".7" />
     </g>
+    <path d={SILUETA} fill="none" stroke={tinta} strokeWidth="7" strokeLinejoin="round" />
+
+    <g fill="none" stroke={tinta} strokeLinecap="round" strokeLinejoin="round">
+      {/* uña */}
+      <path d="M101 44C101 30 139 30 139 44L137 78C125 85 112 85 103 78Z" fill="#FBE3CF" strokeWidth="4.5" />
+      {/* pliegues del índice */}
+      <path d="M100 160Q120 154 144 160" strokeWidth="4" opacity=".55" />
+      <path d="M100 172Q118 168 138 172" strokeWidth="3" opacity=".35" />
+      <path d="M98 228Q122 220 150 228" strokeWidth="4" opacity=".55" />
+      {/* pulgar */}
+      <path d="M92 284C112 300 130 322 138 352C142 370 138 392 132 410" strokeWidth="5" opacity=".75" />
+      <path d="M80 360C86 352 96 350 104 356" strokeWidth="3.5" opacity=".4" />
+      {/* dedos doblados (separaciones) */}
+      <path d="M200 290C198 318 196 350 198 384" strokeWidth="4.5" opacity=".65" />
+      <path d="M246 296C244 324 242 352 242 386" strokeWidth="4.5" opacity=".65" />
+      <path d="M286 304C284 330 282 354 280 382" strokeWidth="4" opacity=".55" />
+      {/* nudillos */}
+      <path d="M210 300Q222 294 234 300" strokeWidth="3.5" opacity=".45" />
+      <path d="M254 306Q266 302 276 308" strokeWidth="3.5" opacity=".45" />
+      {/* tendones del dorso */}
+      <path d="M222 400C220 440 218 470 214 510" strokeWidth="3" opacity=".25" />
+      <path d="M262 402C262 440 258 474 252 510" strokeWidth="3" opacity=".25" />
+    </g>
+
+    {/* puño de la manga */}
+    <path d="M136 520L304 520L310 576L132 576Z" fill={puno} stroke={tinta} strokeWidth="7" strokeLinejoin="round" />
+    <path d="M150 548L296 548" stroke="#ffffff" strokeOpacity=".25" strokeWidth="5" strokeLinecap="round" />
   </svg>
 );
