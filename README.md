@@ -69,3 +69,14 @@ salida/                               ← MP4 finales (generado)
 src/                                  ← plantilla Remotion (escenas en src/scenes)
 scripts/                              ← capturar, render, todos, estudio
 ```
+
+## Videos de producto (hamburguesa, postre, etc.)
+
+Plantilla "producto estrella" (13 s, 1080×1920): llama de marca, producto flotando, ingredientes con flechas, precio, mascota y datos del local.
+
+```bash
+npm run producto -- <slug>              # lee productos/<slug>.json → salida/<slug>.mp4 y -whatsapp.mp4
+npm run producto -- <slug> --frame=150  # un solo fotograma en .tmp/ para revisar rápido
+```
+
+Ejemplo: `productos/laonce-clasic.json`. Necesita un recorte PNG del producto con fondo transparente (`imagen`) y, opcionalmente, una mascota (`mascota`). Los `callouts` indican qué ingrediente señalar (`lado` L/R, posición `y` de la etiqueta y `objetivo` [x, y] en el video).

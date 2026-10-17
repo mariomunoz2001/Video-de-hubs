@@ -8,10 +8,12 @@
     "capturar": "tsx scripts/capturar.ts",
     "render": "tsx scripts/render.ts",
     "todos": "tsx scripts/todos.ts",
+    "producto": "tsx scripts/producto.ts",
     "estudio": "tsx scripts/estudio.ts",
     "tipos": "tsc --noEmit"
   },
   "dependencies": {
+    "@fontsource/caveat": "^5.3.0",
     "@fontsource/poppins": "^5.3.0",
     "@remotion/bundler": "^4.0.534",
     "@remotion/cli": "^4.0.534",

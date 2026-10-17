@@ -3,6 +3,7 @@ import poppins400 from '@fontsource/poppins/files/poppins-latin-400-normal.woff2
 import poppins600 from '@fontsource/poppins/files/poppins-latin-600-normal.woff2';
 import poppins700 from '@fontsource/poppins/files/poppins-latin-700-normal.woff2';
 import poppins800 from '@fontsource/poppins/files/poppins-latin-800-normal.woff2';
+import caveat700 from '@fontsource/caveat/files/caveat-latin-700-normal.woff2';
 
 export const FPS = 30;
 export const WIDTH = 1080;
@@ -25,15 +26,16 @@ export function cargarFuentes() {
   if (cargada) return;
   cargada = true;
   const espera = delayRender('fuentes');
-  const defs: [string, string][] = [
-    ['400', poppins400],
-    ['600', poppins600],
-    ['700', poppins700],
-    ['800', poppins800],
+  const defs: [string, string, string][] = [
+    ['Poppins', '400', poppins400],
+    ['Poppins', '600', poppins600],
+    ['Poppins', '700', poppins700],
+    ['Poppins', '800', poppins800],
+    ['Caveat', '700', caveat700],
   ];
   Promise.all(
-    defs.map(async ([peso, url]) => {
-      const f = new FontFace('Poppins', `url(${url})`, {weight: peso});
+    defs.map(async ([familia, peso, url]) => {
+      const f = new FontFace(familia, `url(${url})`, {weight: peso});
       await f.load();
       document.fonts.add(f);
     }),
