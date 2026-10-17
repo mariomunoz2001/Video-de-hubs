@@ -80,3 +80,7 @@ npm run producto -- <slug> --frame=150  # un solo fotograma en .tmp/ para revisa
 ```
 
 Ejemplo: `productos/laonce-clasic.json`. La hamburguesa es una ilustración en capas (`src/producto/Hamburguesa.tsx`): se arma cayendo, se separa para señalar ingredientes y vuelve a armarse. Los `callouts` indican qué capa señalar (`capa`: ketchup, pepinillos, cebolla, queso…), de qué `lado` (L/R) y a qué altura `y` va la etiqueta. `mascota` es opcional.
+
+### Plantilla "carrusel" (menú con dedo que toca y desliza)
+
+Si el JSON lleva `"plantilla": "carrusel"`, `npm run producto -- <slug>` renderiza un carrusel de tarjetas de productos sobre fondo topográfico. Un dedo ilustrado toca cada tarjeta y la desliza. Cierra con un texto grande y el logo. La duración se ajusta sola a la cantidad de `items` (1,33 s por producto). Ejemplo: `productos/laonce-carrusel.json` (fotos sacadas del menú de La Once GO).

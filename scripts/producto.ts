@@ -5,12 +5,12 @@ import {ensureBrowser, renderMedia, renderStill, selectComposition} from '@remot
 import {DIR_MUSICA, DIR_SALIDA, DIR_TMP, RAIZ} from './lib/clientes.js';
 import {comprimirParaWhatsApp, hayFfmpeg} from './lib/ffmpeg.js';
 import {buscarChromium} from './lib/navegador.js';
-import type {ProductoProps} from '../src/types.js';
+import type {CarruselProps, ProductoProps} from '../src/types.js';
 
 const MB = 1024 * 1024;
 const AUDIO = /\.(mp3|m4a|aac|wav|ogg)$/i;
 
-type Config = Omit<ProductoProps, 'mascota' | 'musica'> & {mascota?: string; musica?: string | false};
+type Config = (Omit<ProductoProps, 'mascota' | 'musica'> | Omit<CarruselProps, 'mascota' | 'musica'>) & {plantilla?: 'producto' | 'carrusel'; mascota?: string; musica?: string | false};
 
 function preparar(slug: string) {
   const archivo = path.join(RAIZ, 'productos', `${slug}.json`);
@@ -37,13 +37,17 @@ function preparar(slug: string) {
       fs.copyFileSync(elegida, path.join(publicDir, musica));
     }
   }
-  const props: ProductoProps = {...cfg, mascota: cfg.mascota ? copiar(cfg.mascota, 'mascota') : undefined, musica};
-  return {props, publicDir};
+  const {plantilla = 'producto', ...resto} = cfg;
+  const props: Record<string, unknown> = {...resto, mascota: cfg.mascota ? copiar(cfg.mascota, 'mascota') : undefined, musica};
+  if (plantilla === 'carrusel') {
+    props.items = (cfg as CarruselProps).items.map((it, i) => ({...it, foto: copiar(it.foto, `item-${i}`)}));
+  }
+  return {props, publicDir, composicion: plantilla === 'carrusel' ? 'Carrusel' : 'Producto'};
 }
 
 export async function renderizarProducto(slug: string, still?: number) {
   if (!hayFfmpeg()) throw new Error('FFmpeg no está instalado (ver README: "Requisitos").');
-  const {props, publicDir} = preparar(slug);
+  const {props, publicDir, composicion} = preparar(slug);
   fs.mkdirSync(DIR_SALIDA, {recursive: true});
   const browserExecutable = buscarChromium() ?? null;
   if (!browserExecutable) await ensureBrowser();
@@ -51,7 +55,7 @@ export async function renderizarProducto(slug: string, still?: number) {
 
   console.log('📦 Empaquetando plantilla…');
   const serveUrl = await bundle({entryPoint: path.join(RAIZ, 'src', 'index.ts'), publicDir});
-  const comp = await selectComposition({serveUrl, id: 'Producto', inputProps: props, browserExecutable, chromeMode});
+  const comp = await selectComposition({serveUrl, id: composicion, inputProps: props, browserExecutable, chromeMode});
 
   if (still !== undefined) {
     const out = path.join(DIR_TMP, `producto-${slug}`, `frame-${String(still).padStart(3, '0')}.png`);

@@ -44,3 +44,15 @@ export type ProductoProps = {
   horario?: string;
   musica?: string;
 };
+
+/** Carrusel de productos con dedo que toca y desliza (estilo "menu ad"). */
+export type CarruselProps = {
+  marca: {l1: string; l2: string};
+  tagline: string;
+  items: {nombre: string; foto: string; precio?: string; pos?: string}[];
+  final: {pre: string; l1: string; l2: string};
+  instagram: string;
+  mascota?: string;
+  colores: {principal: string; acento: string; claro: string; suave: string; fondo: string};
+  musica?: string;
+};

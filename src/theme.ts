@@ -4,6 +4,8 @@ import poppins600 from '@fontsource/poppins/files/poppins-latin-600-normal.woff2
 import poppins700 from '@fontsource/poppins/files/poppins-latin-700-normal.woff2';
 import poppins800 from '@fontsource/poppins/files/poppins-latin-800-normal.woff2';
 import caveat700 from '@fontsource/caveat/files/caveat-latin-700-normal.woff2';
+import fraunces700 from '@fontsource/fraunces/files/fraunces-latin-700-normal.woff2';
+import fraunces800 from '@fontsource/fraunces/files/fraunces-latin-800-normal.woff2';
 
 export const FPS = 30;
 export const WIDTH = 1080;
@@ -32,6 +34,8 @@ export function cargarFuentes() {
     ['Poppins', '700', poppins700],
     ['Poppins', '800', poppins800],
     ['Caveat', '700', caveat700],
+    ['Fraunces', '700', fraunces700],
+    ['Fraunces', '800', fraunces800],
   ];
   Promise.all(
     defs.map(async ([familia, peso, url]) => {
