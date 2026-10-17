@@ -16,7 +16,7 @@ const ejemplo: PromoProps = {
 };
 
 const ejemploProducto: ProductoProps = {
-  marca: 'Tu Marca', producto: 'Producto', tagline: 'Sabor a tu ritmo', precio: '$0', imagen: 'burger.png',
+  marca: 'Tu Marca', producto: 'Producto', tagline: 'Sabor a tu ritmo', precio: '$0',
   colores: {principal: '#0A2472', acento: '#F4A900', claro: '#FDFCF9', suave: '#7189C4'},
   callouts: [], instagram: 'tumarca', direccion: 'Tu dirección',
 };

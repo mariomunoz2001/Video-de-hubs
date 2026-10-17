@@ -21,7 +21,13 @@ export type PromoProps = {
   musica?: string;
 };
 
-export type Callout = {texto: string; lado: 'L' | 'R'; y: number; objetivo: [number, number]};
+export type Callout = {
+  texto: string;
+  lado: 'L' | 'R';
+  y: number;
+  /** Capa de la hamburguesa ilustrada a la que apunta la flecha */
+  capa: 'panArriba' | 'ketchup' | 'pepinillos' | 'cebolla' | 'queso' | 'carne' | 'panAbajo';
+};
 
 /** Video de un producto estrella (hamburguesa, postre, etc.) */
 export type ProductoProps = {
@@ -30,7 +36,6 @@ export type ProductoProps = {
   tagline: string;
   precio: string;
   notaPrecio?: string;
-  imagen: string; // recorte PNG con transparencia (en public)
   mascota?: string;
   colores: {principal: string; acento: string; claro: string; suave: string};
   callouts: Callout[];

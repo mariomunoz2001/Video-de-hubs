@@ -79,4 +79,4 @@ npm run producto -- <slug>              # lee productos/<slug>.json → salida/<
 npm run producto -- <slug> --frame=150  # un solo fotograma en .tmp/ para revisar rápido
 ```
 
-Ejemplo: `productos/laonce-clasic.json`. Necesita un recorte PNG del producto con fondo transparente (`imagen`) y, opcionalmente, una mascota (`mascota`). Los `callouts` indican qué ingrediente señalar (`lado` L/R, posición `y` de la etiqueta y `objetivo` [x, y] en el video).
+Ejemplo: `productos/laonce-clasic.json`. La hamburguesa es una ilustración en capas (`src/producto/Hamburguesa.tsx`): se arma cayendo, se separa para señalar ingredientes y vuelve a armarse. Los `callouts` indican qué capa señalar (`capa`: ketchup, pepinillos, cebolla, queso…), de qué `lado` (L/R) y a qué altura `y` va la etiqueta. `mascota` es opcional.

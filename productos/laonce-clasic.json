@@ -4,7 +4,6 @@
   "tagline": "Sabor a tu ritmo",
   "precio": "$7.500",
   "notaPrecio": "con papas fritas",
-  "imagen": "productos/laonce-clasic/burger.png",
   "mascota": "productos/laonce-clasic/mascota.png",
   "colores": {
     "principal": "#0A2472",
@@ -16,38 +15,26 @@
     {
       "texto": "Kétchup",
       "lado": "R",
-      "y": 620,
-      "objetivo": [
-        674,
-        802
-      ]
+      "y": 640,
+      "capa": "ketchup"
     },
     {
       "texto": "Pepinillos",
       "lado": "L",
       "y": 790,
-      "objetivo": [
-        462,
-        844
-      ]
+      "capa": "pepinillos"
     },
     {
       "texto": "Cebolla morada",
       "lado": "R",
-      "y": 985,
-      "objetivo": [
-        674,
-        894
-      ]
+      "y": 950,
+      "capa": "cebolla"
     },
     {
       "texto": "Queso cheddar",
       "lado": "L",
-      "y": 1075,
-      "objetivo": [
-        462,
-        957
-      ]
+      "y": 1050,
+      "capa": "queso"
     }
   ],
   "instagram": "laonce.go",

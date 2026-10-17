@@ -10,7 +10,7 @@ import type {ProductoProps} from '../src/types.js';
 const MB = 1024 * 1024;
 const AUDIO = /\.(mp3|m4a|aac|wav|ogg)$/i;
 
-type Config = Omit<ProductoProps, 'imagen' | 'mascota' | 'musica'> & {imagen: string; mascota?: string; musica?: string | false};
+type Config = Omit<ProductoProps, 'mascota' | 'musica'> & {mascota?: string; musica?: string | false};
 
 function preparar(slug: string) {
   const archivo = path.join(RAIZ, 'productos', `${slug}.json`);
@@ -37,7 +37,7 @@ function preparar(slug: string) {
       fs.copyFileSync(elegida, path.join(publicDir, musica));
     }
   }
-  const props: ProductoProps = {...cfg, imagen: copiar(cfg.imagen, 'producto'), mascota: cfg.mascota ? copiar(cfg.mascota, 'mascota') : undefined, musica};
+  const props: ProductoProps = {...cfg, mascota: cfg.mascota ? copiar(cfg.mascota, 'mascota') : undefined, musica};
   return {props, publicDir};
 }
 
