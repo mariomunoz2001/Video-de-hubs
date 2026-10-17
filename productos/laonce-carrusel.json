@@ -1,19 +1,73 @@
 {
   "plantilla": "carrusel",
-  "marca": {"l1": "La Once", "l2": "GO!"},
+  "marca": {
+    "l1": "La Once",
+    "l2": "GO!"
+  },
   "tagline": "Sabor a tu ritmo",
   "items": [
-    {"nombre": "Clasic Go", "foto": "productos/laonce-carrusel/clasic-go.jpg", "precio": "$7.500", "pos": "78% 50%"},
-    {"nombre": "Bacon Go", "foto": "productos/laonce-carrusel/bacon-go.jpg", "precio": "$7.990", "pos": "80% 50%"},
-    {"nombre": "Melt Go", "foto": "productos/laonce-carrusel/melt-go.jpg", "precio": "$7.990", "pos": "78% 50%"},
-    {"nombre": "Once Go", "foto": "productos/laonce-carrusel/once-go.jpg", "precio": "$8.500", "pos": "82% 50%"},
-    {"nombre": "Salchipapas", "foto": "productos/laonce-carrusel/salchipapas.jpg", "precio": "$2.500", "pos": "35% 60%"},
-    {"nombre": "Cheesecake pistacho", "foto": "productos/laonce-carrusel/cheesecake-pistacho.jpg", "precio": "$4.500", "pos": "50% 55%"},
-    {"nombre": "Roll canela Nutella", "foto": "productos/laonce-carrusel/roll-de-canela-con-nutella.jpg", "precio": "$3.900", "pos": "50% 55%"},
-    {"nombre": "Galleta NY Oreo", "foto": "productos/laonce-carrusel/galleta-new-york-oreo.jpg", "precio": "$2.900", "pos": "50% 50%"}
+    {
+      "nombre": "Clasic Go",
+      "foto": "productos/laonce-carrusel/clasic-go.jpg",
+      "precio": "$7.500",
+      "pos": "78% 50%"
+    },
+    {
+      "nombre": "Bacon Go",
+      "foto": "productos/laonce-carrusel/bacon-go.jpg",
+      "precio": "$7.990",
+      "pos": "80% 50%"
+    },
+    {
+      "nombre": "Melt Go",
+      "foto": "productos/laonce-carrusel/melt-go.jpg",
+      "precio": "$7.990",
+      "pos": "78% 50%"
+    },
+    {
+      "nombre": "Once Go",
+      "foto": "productos/laonce-carrusel/once-go.jpg",
+      "precio": "$8.500",
+      "pos": "82% 50%"
+    },
+    {
+      "nombre": "Salchipapas",
+      "foto": "productos/laonce-carrusel/salchipapas.jpg",
+      "precio": "$2.500",
+      "pos": "35% 60%"
+    },
+    {
+      "nombre": "Cheesecake pistacho",
+      "foto": "productos/laonce-carrusel/cheesecake-pistacho.jpg",
+      "precio": "$4.500",
+      "pos": "50% 55%"
+    },
+    {
+      "nombre": "Roll canela Nutella",
+      "foto": "productos/laonce-carrusel/roll-de-canela-con-nutella.jpg",
+      "precio": "$3.900",
+      "pos": "50% 55%"
+    },
+    {
+      "nombre": "Galleta NY Oreo",
+      "foto": "productos/laonce-carrusel/galleta-new-york-oreo.jpg",
+      "precio": "$2.900",
+      "pos": "50% 50%"
+    }
   ],
-  "final": {"pre": "No esperes", "l1": "DALE UNA", "l2": "MORDIDA"},
+  "final": {
+    "pre": "No esperes",
+    "l1": "DALE UNA",
+    "l2": "MORDIDA"
+  },
   "instagram": "laonce.go",
   "mascota": "productos/laonce-carrusel/mascota.png",
-  "colores": {"principal": "#0A2472", "acento": "#F4A900", "claro": "#FDFCF9", "suave": "#7189C4", "fondo": "#F2F1ED"}
+  "puntero": "pata",
+  "colores": {
+    "principal": "#0A2472",
+    "acento": "#F4A900",
+    "claro": "#FDFCF9",
+    "suave": "#7189C4",
+    "fondo": "#F2F1ED"
+  }
 }

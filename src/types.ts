@@ -53,6 +53,8 @@ export type CarruselProps = {
   final: {pre: string; l1: string; l2: string};
   instagram: string;
   mascota?: string;
+  /** Qué toca las tarjetas: una mano ilustrada o la patita del perro de la marca */
+  puntero?: 'mano' | 'pata';
   colores: {principal: string; acento: string; claro: string; suave: string; fondo: string};
   musica?: string;
 };

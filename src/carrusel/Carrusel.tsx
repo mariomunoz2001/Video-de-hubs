@@ -3,6 +3,7 @@ import {AbsoluteFill, Audio, Easing, Img, interpolate, spring, staticFile, useCu
 import {cargarFuentes, conAlfa, oscurecer, SAFE_BOTTOM, SAFE_TOP, WIDTH} from '../theme';
 import type {CarruselProps} from '../types';
 import {Mano, PUNTA_X, PUNTA_Y} from './Mano';
+import {Pata, PATA_PUNTA_X, PATA_PUNTA_Y} from './Pata';
 import {Topo} from './Topo';
 
 const SERIF = "'Fraunces', Georgia, serif";
@@ -49,9 +50,9 @@ export const Carrusel: React.FC<CarruselProps> = (p) => {
   const t = frame - ENTRA;
   const k = Math.floor(Math.max(0, t) / SLOT);
   const local = Math.max(0, t) - k * SLOT;
-  const reposo = {x: 650, y: 1150};
-  const toque = {x: 585, y: 1062};
-  const fin = {x: 330, y: 1090};
+  const reposo = {x: 660, y: 1215};
+  const toque = {x: 560, y: 1112};
+  const fin = {x: 320, y: 1140};
   const tapIn = interpolate(local, [4, 11], [0, 1], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: ease});
   const tapOut = interpolate(local, [13, 19], [0, 1], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: ease});
   const swipe = interpolate(local, [SLOT - 10, SLOT - 1], [0, 1], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: ease});
@@ -117,9 +118,9 @@ export const Carrusel: React.FC<CarruselProps> = (p) => {
                   <Img src={staticFile(it.foto)} style={{width: '100%', height: '100%', objectFit: 'cover', objectPosition: it.pos ?? '50% 50%'}} />
                 </div>
                 {it.precio && (
-                  <div style={{position: 'absolute', bottom: 30, right: 34, padding: '8px 22px', borderRadius: 40, background: c.acento, color: c.principal, fontFamily: SANS, fontWeight: 800, fontSize: 38, boxShadow: '0 10px 20px rgba(0,0,0,.3)'}}>{it.precio}</div>
+                  <div style={{position: 'absolute', top: 186, right: 14, padding: '8px 22px', borderRadius: 40, background: c.acento, color: c.principal, fontFamily: SANS, fontWeight: 800, fontSize: 40, boxShadow: '0 10px 20px rgba(0,0,0,.35)', transform: 'rotate(4deg)'}}>{it.precio}</div>
                 )}
-                <div style={{position: 'absolute', bottom: 34, left: 34, fontFamily: HAND, fontWeight: 700, fontSize: 46, color: c.suave}}>{p.marca.l1} {p.marca.l2}</div>
+                <div style={{position: 'absolute', bottom: 30, left: 0, right: 0, textAlign: 'center', fontFamily: HAND, fontWeight: 700, fontSize: 46, color: c.suave}}>{p.marca.l1} {p.marca.l2}</div>
               </div>
             );
           })}
@@ -128,9 +129,15 @@ export const Carrusel: React.FC<CarruselProps> = (p) => {
 
       {/* mano */}
       {frame < finCartas + 8 && (
-        <div style={{position: 'absolute', left: hx - PUNTA_X, top: manoY - PUNTA_Y, transform: 'rotate(-14deg) scale(.84)', transformOrigin: `${PUNTA_X}px ${PUNTA_Y}px`, filter: 'drop-shadow(-18px 26px 22px rgba(5,15,60,.28))'}}>
-          <Mano tinta={c.principal} manga={c.acento} puno={c.principal} />
-        </div>
+        p.puntero === 'pata' ? (
+          <div style={{position: 'absolute', left: hx - PATA_PUNTA_X, top: manoY - PATA_PUNTA_Y, transform: 'rotate(-12deg) scale(.86)', transformOrigin: `${PATA_PUNTA_X}px ${PATA_PUNTA_Y}px`, filter: 'drop-shadow(-18px 26px 22px rgba(5,15,60,.28))'}}>
+            <Pata tinta={c.principal} />
+          </div>
+        ) : (
+          <div style={{position: 'absolute', left: hx - PUNTA_X, top: manoY - PUNTA_Y, transform: 'rotate(-14deg) scale(.84)', transformOrigin: `${PUNTA_X}px ${PUNTA_Y}px`, filter: 'drop-shadow(-18px 26px 22px rgba(5,15,60,.28))'}}>
+            <Mano tinta={c.principal} manga={c.acento} puno={c.principal} />
+          </div>
+        )
       )}
 
       {/* texto final */}
