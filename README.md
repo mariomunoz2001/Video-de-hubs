@@ -87,11 +87,12 @@ Si el JSON lleva `"plantilla": "carrusel"`, `npm run producto -- <slug>` renderi
 
 ## Video de exposición: análisis de falla (láminas 9 a 11)
 
-Guion en `src/analisis/guion.ts` (cada frase dispara su animación y su subtítulo); diseño en `src/analisis/Analisis.tsx`.
+Estilo editorial animado: fondos papel/noche con grano, titulares que se arman palabra por palabra al ritmo de la voz, ilustraciones con trama de puntos que hacen lo que se dice, sellos de goma, hilo naranja y destellos lima.
 
-- Narración: `analisis/voz-09.wav`, `voz-10.wav`, `voz-11.wav` (voz sintética en español).
-- `analisis/tiempos.json`: inicio y fin de cada palabra de la narración, que fijan cuándo aparece cada elemento y se resalta cada palabra del subtítulo. Si cambias el texto o la voz, hay que regenerar estos tiempos (el render avisa si no calza el número de palabras).
-- Música: `analisis/musica.mp3`, generada con `python3 scripts/generar-musica.py salida.wav 62`. Baja sola mientras hay voz. Para usar otra, reemplaza el archivo con el mismo nombre.
+- Guion: `src/analisis/guion.ts`. Cada escena tiene frases (titulares) y cada frase sus beats. Colores por palabra: `*naranja*`, `_azul_`, `^lima^`.
+- Animaciones: `src/analisis/Analisis.tsx` (una escena por lámina) y piezas ilustradas en `src/analisis/piezas.tsx`.
+- Narración: `analisis/voz-00.wav` … `voz-11.wav` (voz sintética en español). `analisis/tiempos.json` guarda el inicio y fin de cada palabra; con eso se sincroniza todo. Si cambias el texto o la voz hay que regenerar los tiempos (el render avisa si no calza el número de palabras).
+- Música: `analisis/musica.mp3`, base lo-fi generada con `python3 scripts/generar-musica.py salida.wav 80` (sin samples ni derechos). Baja sola mientras hay voz.
 
 ```bash
 npm run analisis                 # → salida/analisis-fatiga.mp4 y salida/analisis-fatiga-whatsapp.mp4

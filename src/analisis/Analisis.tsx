@@ -1,458 +1,571 @@
 import React from 'react';
-import {AbsoluteFill, Audio, Easing, interpolate, Sequence, spring, staticFile, useCurrentFrame, useVideoConfig} from 'remotion';
-import {cargarFuentes, conAlfa, SAFE_SIDE, WIDTH} from '../theme';
-import {duracionLamina, inicioEscenas, INTRO, LAMINAS, tiemposLamina, TRANSICION, VOZ} from './guion';
-import type {Palabra} from './guion';
+import {AbsoluteFill, Audio, continueRender, delayRender, Easing, interpolate, random, Sequence, staticFile, useCurrentFrame, useVideoConfig} from 'remotion';
+import archivoVar from '@fontsource-variable/archivo/files/archivo-latin-wdth-normal.woff2';
+import mono400 from '@fontsource/space-mono/files/space-mono-latin-400-normal.woff2';
+import mono700 from '@fontsource/space-mono/files/space-mono-latin-700-normal.woff2';
+import {ESCENAS, inicioEscenas, ONDA, tiemposEscena, VOZ} from './guion';
+import type {Fondo, Linea} from './guion';
+import {ap, Bloque, CL, Comparador, Cronometro, Defs, Destello, Eje, Equis, GROTESK, Grieta, Hilo, IconoDesalineado, Lupa, mezcla, MONO, Motor, OndaVib, P, Portapapeles, rebote, sale, Sello} from './piezas';
 
-// ---------- paleta "plano técnico" ----------
-const C = {
-  fondo: '#0D1726',
-  fondo2: '#13233A',
-  carta: '#172A44',
-  borde: 'rgba(160,190,230,0.18)',
-  linea: 'rgba(160,190,230,0.10)',
-  texto: '#F3EEE3',
-  suave: '#93A6C2',
-  naranja: '#FF7A1A',
-  rojo: '#F0484E',
-  ambar: '#FFC24B',
-};
-const SERIF = "'Fraunces', Georgia, serif";
-const SANS = "'Poppins', system-ui, sans-serif";
-const HAND = "'Caveat', cursive";
+const W = 1080;
+const H = 1920;
+const MARGEN = 72;
 
-const CL = {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'} as const;
-const salida = Easing.out(Easing.cubic);
-const aparece = (f: number, ini: number, dur = 14) => interpolate(f, [ini, ini + dur], [0, 1], {...CL, easing: salida});
-
-// ---------- fondo con cuadrícula de plano ----------
-const Fondo: React.FC = () => {
-  const f = useCurrentFrame();
-  const d = f * 0.35;
-  return (
-    <AbsoluteFill style={{background: `linear-gradient(170deg, ${C.fondo2} 0%, ${C.fondo} 60%, #08101C 100%)`}}>
-      <AbsoluteFill
-        style={{
-          backgroundImage: `linear-gradient(${C.linea} 1px, transparent 1px), linear-gradient(90deg, ${C.linea} 1px, transparent 1px),
-            linear-gradient(rgba(160,190,230,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(160,190,230,0.04) 1px, transparent 1px)`,
-          backgroundSize: '120px 120px, 120px 120px, 24px 24px, 24px 24px',
-          backgroundPosition: `${d}px ${d * 0.6}px`,
-        }}
-      />
-      <div style={{position: 'absolute', width: 1100, height: 1100, borderRadius: '50%', left: -420, top: -260, background: `radial-gradient(circle, ${conAlfa(C.naranja, 0.13)}, transparent 62%)`}} />
-      <div style={{position: 'absolute', width: 1200, height: 1200, borderRadius: '50%', right: -520, bottom: -300, background: `radial-gradient(circle, ${conAlfa('#3D7BD9', 0.16)}, transparent 62%)`}} />
-      <AbsoluteFill style={{background: 'radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,0.45) 100%)'}} />
-    </AbsoluteFill>
-  );
+// ---------- fuentes ----------
+let cargadas = false;
+const cargarFuentes = () => {
+  if (cargadas) return;
+  cargadas = true;
+  const espera = delayRender('fuentes análisis');
+  const defs: [string, string, FontFaceDescriptors][] = [
+    ['Archivo', archivoVar, {weight: '100 900', stretch: '62% 125%'}],
+    ['Space Mono', mono400, {weight: '400'}],
+    ['Space Mono', mono700, {weight: '700'}],
+  ];
+  Promise.all(defs.map(async ([fam, url, d]) => { const ff = new FontFace(fam, `url(${url})`, d); await ff.load(); document.fonts.add(ff); }))
+    .catch((e) => console.warn('fuentes', e))
+    .finally(() => continueRender(espera));
 };
 
-// ---------- encabezado de lámina ----------
-const Encabezado: React.FC<{numero: string; titulo: string; bajada: string; activa: number}> = ({numero, titulo, bajada, activa}) => {
-  const f = useCurrentFrame();
-  const a = aparece(f, 2, 16);
-  const b = aparece(f, 8, 16);
-  return (
-    <div style={{position: 'absolute', left: SAFE_SIDE, right: SAFE_SIDE, top: 250, height: 170}}>
-      <div style={{display: 'flex', alignItems: 'flex-end', gap: 26}}>
-        <div style={{fontFamily: SERIF, fontWeight: 800, fontSize: 150, lineHeight: 0.8, color: 'transparent', WebkitTextStroke: `3px ${C.naranja}`, opacity: a, transform: `translateY(${(1 - a) * 40}px)`}}>
-          {numero}
-        </div>
-        <div style={{opacity: b, transform: `translateX(${(1 - b) * 40}px)`, paddingBottom: 4}}>
-          <div style={{fontFamily: SANS, fontWeight: 600, fontSize: 25, letterSpacing: 5, color: C.naranja, textTransform: 'uppercase'}}>{bajada}</div>
-          <div style={{fontFamily: SERIF, fontWeight: 700, fontSize: 78, lineHeight: 1, color: C.texto, marginTop: 6}}>{titulo}</div>
-        </div>
-      </div>
-      <div style={{position: 'absolute', right: 0, top: -62, display: 'flex', gap: 10, opacity: a}}>
-        {LAMINAS.map((l, i) => (
-          <div key={l.numero} style={{fontFamily: SANS, fontWeight: 700, fontSize: 20, padding: '6px 14px', borderRadius: 30, color: i === activa ? C.fondo : C.suave, background: i === activa ? C.naranja : 'transparent', border: `2px solid ${i === activa ? C.naranja : C.borde}`}}>
-            {l.numero}
-          </div>
-        ))}
-      </div>
-      <div style={{position: 'absolute', left: 0, bottom: 0, height: 3, width: `${b * 100}%`, background: `linear-gradient(90deg, ${C.naranja}, transparent)`}} />
-    </div>
-  );
-};
+const tinta = (fondo: Fondo) => (fondo === 'papel' ? P.tinta : P.crema);
+const colorPalabra = (c: string, fondo: Fondo) => (c === 'naranja' ? P.naranja : c === 'azul' ? (fondo === 'noche' ? '#6E80FF' : P.azul) : c === 'lima' ? (fondo === 'papel' ? '#7A9A00' : P.lima) : tinta(fondo));
 
-// ---------- subtítulos palabra a palabra ----------
-const Subtitulos: React.FC<{beats: Palabra[][]; inicios: number[]}> = ({beats, inicios}) => {
+// ---------- grano de película ----------
+const Grano: React.FC<{fondo: Fondo}> = ({fondo}) => {
   const f = useCurrentFrame();
-  let i = -1;
-  for (let k = 0; k < inicios.length; k++) if (f >= inicios[k] - 2) i = k;
-  if (i < 0) return null;
-  const ws = beats[i];
-  const fin = i < beats.length - 1 ? inicios[i + 1] - 2 : Infinity;
-  const entra = aparece(f, inicios[i] - 2, 5);
-  const sale = Number.isFinite(fin) ? interpolate(f, [fin - 3, fin], [0, 1], CL) : 0;
+  const seed = Math.floor(f / 2) % 12;
   return (
-    <div style={{position: 'absolute', left: SAFE_SIDE, right: SAFE_SIDE, top: 1450, height: 190, display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: entra * (1 - sale)}}>
-      <div style={{fontFamily: SANS, fontWeight: 600, fontSize: 44, lineHeight: 1.32, textAlign: 'center', color: C.texto, textShadow: '0 4px 18px rgba(0,0,0,0.6)'}}>
-        {ws.map((w, k) => {
-          const on = interpolate(f, [w.ini - 1, w.ini + 3], [0, 1], CL);
-          const sig = k < ws.length - 1 ? ws[k + 1].ini : w.fin + 4;
-          const activa = f >= w.ini - 1 && f < sig;
-          return (
-            <span key={k} style={{opacity: 0.28 + on * 0.72, color: activa ? C.ambar : C.texto, display: 'inline-block', transform: `translateY(${(1 - on) * 8}px)`, marginRight: 12}}>
-              {w.texto}
-            </span>
-          );
-        })}
-      </div>
-    </div>
-  );
-};
-
-// ---------- tarjeta y conector ----------
-type Tipo = 'problema' | 'porque' | 'raiz';
-const ETIQUETA: Record<Tipo, string> = {problema: 'Falla', porque: '¿Por qué?', raiz: 'Causa raíz'};
-
-const Tarjeta: React.FC<{texto: string; tipo: Tipo; ini: number; x: number; y: number; w: number; h: number; tam?: number; pad?: number; extra?: React.ReactNode}> = ({texto, tipo, ini, x, y, w, h, tam = 38, pad = 34, extra}) => {
-  const f = useCurrentFrame();
-  const {fps} = useVideoConfig();
-  const s = spring({frame: f - ini, fps, config: {damping: 14, stiffness: 120}});
-  const a = aparece(f, ini, 10);
-  const color = tipo === 'problema' ? C.rojo : tipo === 'raiz' ? C.naranja : C.suave;
-  const pulso = tipo === 'raiz' ? 0.5 + 0.5 * Math.sin((f - ini) / 9) : 0;
-  const fondo = tipo === 'raiz' ? `linear-gradient(135deg, ${conAlfa(C.naranja, 0.95)}, #E0560B)` : tipo === 'problema' ? `linear-gradient(135deg, ${conAlfa(C.rojo, 0.22)}, ${C.carta})` : C.carta;
-  return (
-    <div
-      style={{
-        position: 'absolute', left: x, top: y, width: w, height: h, borderRadius: 26, background: fondo, opacity: a,
-        border: `2px solid ${tipo === 'porque' ? C.borde : color}`, transform: `translateY(${(1 - s) * 50}px) scale(${0.92 + s * 0.08})`,
-        boxShadow: tipo === 'raiz' ? `0 0 ${30 + pulso * 40}px ${conAlfa(C.naranja, 0.35 + pulso * 0.2)}` : '0 18px 40px rgba(0,0,0,0.35)',
-        padding: `0 ${pad}px`, display: 'flex', flexDirection: 'column', justifyContent: 'center', overflow: 'hidden', boxSizing: 'border-box',
-      }}
-    >
-      {extra}
-      <div style={{fontFamily: SANS, fontWeight: 700, fontSize: 21, letterSpacing: 4, textTransform: 'uppercase', color: tipo === 'raiz' ? C.fondo : color, position: 'relative'}}>
-        {ETIQUETA[tipo]}
-      </div>
-      <div style={{fontFamily: SANS, fontWeight: 600, fontSize: tam, lineHeight: 1.18, color: tipo === 'raiz' ? '#1A0D02' : C.texto, marginTop: 4, position: 'relative'}}>{texto}</div>
-    </div>
-  );
-};
-
-/** Flecha vertical que se dibuja de (x, y1) a (x, y2). */
-const Flecha: React.FC<{x: number; y1: number; y2: number; ini: number; color?: string}> = ({x, y1, y2, ini, color = C.suave}) => {
-  const f = useCurrentFrame();
-  const p = aparece(f, ini, 10);
-  const largo = (y2 - y1 - 14) * p;
-  if (p <= 0) return null;
-  return (
-    <svg style={{position: 'absolute', left: x - 20, top: y1, overflow: 'visible'}} width={40} height={y2 - y1}>
-      <line x1={20} y1={0} x2={20} y2={largo} stroke={color} strokeWidth={4} strokeDasharray="2 10" strokeLinecap="round" />
-      {p > 0.9 && <path d={`M 8 ${y2 - y1 - 16} L 20 ${y2 - y1 - 2} L 32 ${y2 - y1 - 16}`} stroke={color} strokeWidth={4} fill="none" strokeLinecap="round" strokeLinejoin="round" />}
+    <svg width={W} height={H} style={{position: 'absolute', inset: 0, opacity: fondo === 'papel' ? 0.2 : 0.14, mixBlendMode: fondo === 'papel' ? 'multiply' : 'screen', pointerEvents: 'none'}}>
+      <filter id={`grano${seed}`}>
+        <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves={2} seed={seed} />
+        <feColorMatrix type="saturate" values="0" />
+      </filter>
+      <rect width={W} height={H} filter={`url(#grano${seed})`} />
     </svg>
   );
 };
 
-/** Flecha que se abre desde un punto hacia dos tarjetas. */
-const FlechaDoble: React.FC<{x: number; xs: [number, number]; y1: number; y2: number; ini: [number, number]; color?: string}> = ({x, xs, y1, y2, ini, color = C.suave}) => {
+/** Trama de puntos muy suave de fondo, como papel impreso. */
+const FondoPlano: React.FC<{fondo: Fondo}> = ({fondo}) => (
+  <AbsoluteFill style={{background: fondo === 'papel' ? P.papel : P.noche}}>
+    <AbsoluteFill
+      style={{
+        backgroundImage: `radial-gradient(${fondo === 'papel' ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.05)'} 1.4px, transparent 1.6px)`,
+        backgroundSize: '14px 14px',
+      }}
+    />
+    <AbsoluteFill style={{background: 'radial-gradient(ellipse at 50% 45%, transparent 50%, rgba(0,0,0,0.22) 100%)'}} />
+  </AbsoluteFill>
+);
+
+// ---------- titulares palabra a palabra ----------
+const tamTitular = (lineas: Linea[]) => {
+  const n = lineas.reduce((a, l) => a + l.reduce((b, p) => b + p.texto.length + 1, 0), 0);
+  const larga = Math.max(...lineas.flat().map((p) => p.texto.length));
+  const base = n <= 26 ? 116 : n <= 44 ? 98 : n <= 64 ? 84 : 72;
+  return Math.min(base, Math.floor((W - MARGEN * 2) / (larga * 0.74)));
+};
+
+const Titulares: React.FC<{frases: Linea[][]; fondo: Fondo}> = ({frases, fondo}) => {
   const f = useCurrentFrame();
-  const h = y2 - y1;
+  const inicioFrase = frases.map((fr) => fr[0][0].ini);
   return (
-    <svg style={{position: 'absolute', left: 0, top: y1, overflow: 'visible'}} width={WIDTH} height={h}>
-      {xs.map((xd, i) => {
-        const p = aparece(f, ini[i], 12);
-        const d = `M ${x} 0 C ${x} ${h * 0.55}, ${xd} ${h * 0.35}, ${xd} ${h - 6}`;
+    <div style={{position: 'absolute', left: MARGEN, right: MARGEN, top: 292, height: 420}}>
+      {frases.map((fr, i) => {
+        const ini = inicioFrase[i] - 3;
+        const fin = i < frases.length - 1 ? inicioFrase[i + 1] - 7 : Infinity;
+        if (f < ini - 1 || f > fin + 10) return null;
+        const fs = tamTitular(fr);
+        let k = 0;
         return (
-          <g key={i} opacity={p > 0 ? 1 : 0}>
-            <path d={d} stroke={color} strokeWidth={4} fill="none" strokeDasharray="2 10" strokeLinecap="round" pathLength={1} style={{strokeDasharray: `${p} 1`}} />
-            {p > 0.9 && <path d={`M ${xd - 12} ${h - 18} L ${xd} ${h - 4} L ${xd + 12} ${h - 18}`} stroke={color} strokeWidth={4} fill="none" strokeLinecap="round" strokeLinejoin="round" />}
-          </g>
+          <div key={i} style={{position: 'absolute', left: 0, right: 0, top: 0}}>
+            {fr.map((linea, li) => (
+              <div key={li} style={{display: 'flex', flexWrap: 'wrap', columnGap: fs * 0.26}}>
+                {linea.map((p) => {
+                  const idx = k++;
+                  const entra = ap(f, p.ini - 3, 6);
+                  const fuera = Number.isFinite(fin) ? sale(f, fin + idx * 0.6, 7) : 0;
+                  const y = (1 - entra) * 105 - fuera * 110;
+                  return (
+                    <span key={idx} style={{display: 'inline-block', overflow: 'hidden', lineHeight: 1.04, paddingBottom: fs * 0.08, marginBottom: -fs * 0.08}}>
+                      <span
+                        style={{
+                          display: 'inline-block', transform: `translateY(${y}%)`, fontFamily: GROTESK, fontWeight: 800, fontStretch: '125%',
+                          fontSize: fs, letterSpacing: -fs * 0.025, color: colorPalabra(p.color, fondo), whiteSpace: 'nowrap',
+                        }}
+                      >
+                        {p.texto.toLowerCase()}
+                      </span>
+                    </span>
+                  );
+                })}
+              </div>
+            ))}
+          </div>
         );
       })}
-    </svg>
+    </div>
   );
 };
 
-// ---------- cadena de 5 ¿por qué? ----------
-type Fila = {cartas: {texto: string; tipo: Tipo; beat: number; extra?: React.ReactNode}[]};
-
-const Cadena: React.FC<{filas: Fila[]; inicios: number[]; top?: number; alto?: number; hueco?: number}> = ({filas, inicios, top = 470, alto = 140, hueco = 52}) => {
-  const ancho = WIDTH - SAFE_SIDE * 2;
-  const mitad = (ancho - 28) / 2;
-  const cx = WIDTH / 2;
-  const els: React.ReactNode[] = [];
-  filas.forEach((fila, i) => {
-    const y = top + i * (alto + hueco);
-    const doble = fila.cartas.length === 2;
-    fila.cartas.forEach((c, k) => {
-      const x = doble ? SAFE_SIDE + k * (mitad + 28) : SAFE_SIDE;
-      els.push(<Tarjeta key={`${i}-${k}`} texto={c.texto} tipo={c.tipo} ini={inicios[c.beat]} x={x} y={y} w={doble ? mitad : ancho} h={alto} tam={doble ? 28 : 38} pad={doble ? 26 : 34} extra={c.extra} />);
-    });
-    if (i > 0) {
-      const y1 = y - hueco + 4;
-      const prevDoble = filas[i - 1].cartas.length === 2;
-      const color = fila.cartas.some((c) => c.tipo === 'raiz') ? C.naranja : C.suave;
-      if (doble && !prevDoble) {
-        els.push(<FlechaDoble key={`f${i}`} x={cx} xs={[SAFE_SIDE + mitad / 2, SAFE_SIDE + mitad * 1.5 + 28]} y1={y1} y2={y + 2} ini={[inicios[fila.cartas[0].beat] - 8, inicios[fila.cartas[1].beat] - 8]} color={color} />);
-      } else {
-        els.push(<Flecha key={`f${i}`} x={cx} y1={y1} y2={y + 2} ini={inicios[fila.cartas[0].beat] - 8} color={color} />);
-      }
-    }
-  });
-  return <>{els}</>;
-};
-
-// ---------- ilustraciones ----------
-/** Onda de vibración que crece sin que nada la detenga. */
-const Vibracion: React.FC<{ini: number}> = ({ini}) => {
-  const f = useCurrentFrame();
-  const t = Math.max(0, f - ini);
-  const amp = Math.min(46, 8 + t * 0.35);
-  const pts: string[] = [];
-  for (let x = 0; x <= 420; x += 4) {
-    const env = 0.35 + 0.65 * (x / 420);
-    const y = 70 + Math.sin(x / 9 + t / 2.2) * amp * env + Math.sin(x / 3.7 + t / 1.3) * amp * 0.25 * env;
-    pts.push(`${x},${y.toFixed(1)}`);
-  }
+/** Texto pequeño monoespaciado tipo máquina de escribir. */
+const Mono: React.FC<{x: number; y: number; texto: string; f: number; ini: number; color: string; tam?: number; ancla?: 'start' | 'middle' | 'end'; acento?: string}> = ({x, y, texto, f, ini, color, tam = 26, ancla = 'start', acento}) => {
+  const n = Math.max(0, Math.min(texto.length, Math.floor((f - ini) * 1.6)));
+  if (n <= 0) return null;
   return (
-    <svg style={{position: 'absolute', right: 20, top: 0, opacity: 0.55}} width={420} height={140}>
-      <polyline points={pts.join(' ')} fill="none" stroke={C.rojo} strokeWidth={3.5} strokeLinejoin="round" />
-    </svg>
+    <text x={x} y={y} fontFamily={MONO} fontWeight={700} fontSize={tam} fill={acento ?? color} textAnchor={ancla}>
+      {texto.slice(0, n)}
+    </text>
   );
 };
 
-/** Eje con acople desalineado y grieta, para la portada. */
-const Eje: React.FC = () => {
+const Etiqueta: React.FC<{texto: string; fondo: Fondo; activa: number}> = ({texto, fondo, activa}) => {
   const f = useCurrentFrame();
-  const giro = (f * 9) % 60;
-  const grieta = aparece(f, 26, 22);
-  const franjas = Array.from({length: 14}, (_, i) => i * 60 - giro);
+  const c = fondo === 'papel' ? 'rgba(21,21,21,0.6)' : 'rgba(242,238,230,0.55)';
   return (
-    <svg width={936} height={300} viewBox="0 0 936 300" style={{overflow: 'visible'}}>
-      <defs>
-        <linearGradient id="metal" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="#5D7290" />
-          <stop offset="0.35" stopColor="#C9D6E8" />
-          <stop offset="0.6" stopColor="#7F93AF" />
-          <stop offset="1" stopColor="#2E3D55" />
-        </linearGradient>
-        <clipPath id="ejeA"><rect x={0} y={118} width={430} height={64} rx={10} /></clipPath>
-        <clipPath id="ejeB"><rect x={0} y={-32} width={430} height={64} rx={10} /></clipPath>
-      </defs>
-      {/* motor */}
-      <rect x={0} y={80} width={170} height={140} rx={18} fill={C.carta} stroke={C.borde} strokeWidth={2} />
-      {[0, 1, 2, 3, 4].map((i) => <line key={i} x1={24 + i * 28} y1={96} x2={24 + i * 28} y2={204} stroke={C.borde} strokeWidth={6} strokeLinecap="round" />)}
-      {/* eje del motor */}
-      <g transform="translate(170 0)">
-        <g clipPath="url(#ejeA)">
-          <rect x={0} y={118} width={430} height={64} fill="url(#metal)" />
-          {franjas.map((x) => <rect key={x} x={x} y={118} width={8} height={64} fill="rgba(13,23,38,0.25)" />)}
-        </g>
-        {/* grieta */}
-        <path d="M 300 118 L 292 134 L 306 146 L 294 160 L 304 172 L 298 182" stroke={C.rojo} strokeWidth={5} fill="none" strokeLinecap="round" strokeLinejoin="round" pathLength={1} style={{strokeDasharray: `${grieta} 1`, filter: `drop-shadow(0 0 ${8 * grieta}px ${C.rojo})`}} />
-      </g>
-      {/* acople y eje conducido, girado unos grados: desalineamiento */}
-      <g transform="translate(600 150) rotate(-4)">
-        <rect x={0} y={-56} width={60} height={112} rx={10} fill="#7F93AF" stroke="#C9D6E8" strokeWidth={2} />
-        <g transform="translate(60 0)">
-          <g clipPath="url(#ejeB)">
-            <rect x={0} y={-32} width={300} height={64} fill="url(#metal)" />
-            {franjas.map((x) => <rect key={x} x={x} y={-32} width={8} height={64} fill="rgba(13,23,38,0.25)" />)}
-          </g>
-        </g>
-        <line x1={-430} y1={0} x2={380} y2={0} stroke={C.naranja} strokeWidth={2} strokeDasharray="14 10" opacity={0.8} />
-      </g>
-      <line x1={170} y1={150} x2={936} y2={150} stroke={C.suave} strokeWidth={2} strokeDasharray="14 10" opacity={0.5} />
-      <text x={936} y={70} textAnchor="end" fontFamily={HAND} fontWeight={700} fontSize={40} fill={C.naranja} opacity={grieta}>desalineado</text>
-      <text x={470} y={250} textAnchor="middle" fontFamily={HAND} fontWeight={700} fontSize={40} fill={C.rojo} opacity={grieta}>grieta por fatiga</text>
+    <svg width={W} height={H} style={{position: 'absolute', inset: 0}}>
+      <Mono x={MARGEN} y={1608} texto={texto} f={f} ini={4} color={c} tam={25} />
+      {activa >= 0 && [0, 1, 2].map((i) => (
+        <circle key={i} cx={W - MARGEN - 12 - (2 - i) * 34} cy={1600} r={i === activa ? 10 : 7} fill={i === activa ? P.naranja : c} opacity={ap(f, 6 + i * 3, 8)} />
+      ))}
     </svg>
   );
 };
 
-// ---------- escenas ----------
+// =====================================================================
+// Escena 00 · portada
+// =====================================================================
 const Portada: React.FC = () => {
   const f = useCurrentFrame();
-  const a = aparece(f, 4, 18);
-  const b = aparece(f, 12, 18);
-  const c = aparece(f, 22, 18);
+  const T = tiemposEscena(0);
+  const tGrieta = T.w(0, 3);
+  const golpe = f >= tGrieta && f < tGrieta + 8 ? Math.sin((f - tGrieta) * 2.4) * (8 - (f - tGrieta)) * 1.6 : 0;
+  const entra = ap(f, 0, 18);
+  const giro = f * 9;
   return (
-    <AbsoluteFill>
-      <div style={{position: 'absolute', left: SAFE_SIDE, right: SAFE_SIDE, top: 400}}>
-        <div style={{fontFamily: SANS, fontWeight: 600, fontSize: 28, letterSpacing: 6, textTransform: 'uppercase', color: C.naranja, opacity: a, transform: `translateY(${(1 - a) * 20}px)`}}>
-          Análisis de causa raíz
-        </div>
-        <div style={{fontFamily: SERIF, fontWeight: 800, fontSize: 118, lineHeight: 1.0, color: C.texto, marginTop: 20, opacity: b, transform: `translateY(${(1 - b) * 40}px)`}}>
-          ¿Por qué se fracturó el eje?
-        </div>
-      </div>
-      <div style={{position: 'absolute', left: SAFE_SIDE, top: 870, opacity: c, transform: `translateX(${(1 - c) * -60}px)`}}>
-        <Eje />
-      </div>
-      <div style={{position: 'absolute', left: SAFE_SIDE, right: SAFE_SIDE, top: 1330, display: 'flex', gap: 16, opacity: c}}>
-        {['Jerarquización', 'Cadena 1', 'Cadena 2'].map((t, i) => (
-          <div key={t} style={{fontFamily: SANS, fontWeight: 600, fontSize: 26, color: C.texto, padding: '12px 24px', borderRadius: 40, border: `2px solid ${C.borde}`, background: conAlfa(C.carta, 0.8)}}>
-            <span style={{color: C.naranja, marginRight: 10}}>{LAMINAS[i].numero}</span>{t}
-          </div>
-        ))}
-      </div>
-    </AbsoluteFill>
+    <svg width={W} height={H} style={{position: 'absolute', inset: 0}}>
+      <g transform={`translate(${golpe} ${(1 - entra) * 120}) translate(540 1080) scale(1.1) translate(-552 -1080)`} opacity={entra}>
+        <ellipse cx={600} cy={1250} rx={440} ry={26} fill="#000" opacity={0.35} />
+        <Eje x1={420} x2={990} y={1080} giro={giro} grosor={54} />
+        <Bloque x={850} y={1040} w={84} h={150} c={P.azul} trama="tramaAzul" rx={10} />
+        <circle cx={892} cy={1080} r={34} fill={P.azulOsc} />
+        <Motor x={430} y={1080} f={f} fondo="noche" s={1.05} />
+        <Grieta x={700} y={1080} alto={64} p={ap(f, tGrieta, 10)} />
+        {f > tGrieta + 4 && <circle cx={700} cy={1080} r={mezcla(30, 110, ap(f, tGrieta + 4, 14))} fill="none" stroke={P.naranja} strokeWidth={4} opacity={1 - ap(f, tGrieta + 8, 16)} />}
+        <Destello x={742} y={1012} f={f} ini={T.w(0, 5)} s={1.1} />
+      </g>
+    </svg>
   );
 };
 
-/** Lámina 9: matriz evidencia × explica la fatiga, y la historia que une las tres causas. */
-const Jerarquizacion: React.FC<{inicios: number[]; beats: Palabra[][]}> = ({inicios, beats}) => {
-  const f = useCurrentFrame();
-  const {fps} = useVideoConfig();
-  const X = SAFE_SIDE + 46;
-  const Y = 470;
-  const W = WIDTH - SAFE_SIDE * 2 - 46;
-  const H = 480;
-  const m = aparece(f, inicios[0], 18);
-  const ejes = aparece(f, inicios[0] + 10, 20);
-  const zona = aparece(f, inicios[1], 14);
-  const causas = [
-    {t: 'Desalineamiento', x: 0.6, y: 0.135, d: 0},
-    {t: 'Sin procedimiento', x: 0.535, y: 0.255, d: 18},
-    {t: 'Montaje sin alinear', x: 0.56, y: 0.375, d: 36},
-  ];
-  const historia = aparece(f, inicios[3], 14);
-  const pasos = ['Sin procedimiento', 'Montaje sin alinear', 'Desalineamiento'];
-  const cw = 268;
-  const gap = (W + 46 - cw * 3) / 2;
-  // "sin procedimiento, | se montó sin alinear, | y eso generó el desalineamiento."
-  const tPaso = [beats[4][0].ini - 2, beats[4][2].ini - 2, beats[4][8].ini - 2];
-  return (
-    <>
-      {/* matriz */}
-      <div style={{position: 'absolute', left: X, top: Y, width: W, height: H, opacity: m, transform: `scale(${0.96 + m * 0.04})`}}>
-        <div style={{position: 'absolute', inset: 0, borderLeft: `3px solid ${C.suave}`, borderBottom: `3px solid ${C.suave}`}} />
-        <div style={{position: 'absolute', left: W / 2, top: 0, bottom: 0, borderLeft: `2px dashed ${C.borde}`, opacity: ejes}} />
-        <div style={{position: 'absolute', top: H / 2, left: 0, right: 0, borderTop: `2px dashed ${C.borde}`, opacity: ejes}} />
-        <div style={{position: 'absolute', left: W / 2 + 2, top: 0, width: W / 2 - 2, height: H / 2, background: conAlfa(C.naranja, 0.16 * zona), border: `2px solid ${conAlfa(C.naranja, zona)}`, borderRadius: 18, boxSizing: 'border-box'}} />
-        <div style={{position: 'absolute', left: W / 2 + 22, top: 14, fontFamily: SANS, fontWeight: 700, fontSize: 20, letterSpacing: 3, color: C.naranja, opacity: zona}}>PRIORIDAD ALTA</div>
-        <div style={{position: 'absolute', left: 30, bottom: 26, fontFamily: HAND, fontWeight: 700, fontSize: 38, color: C.suave, opacity: ejes * 0.8}}>baja evidencia,<br />no explica</div>
-        <div style={{position: 'absolute', right: 0, bottom: -50, fontFamily: SANS, fontWeight: 600, fontSize: 24, color: C.suave, opacity: ejes}}>Evidencia →</div>
-        <div style={{position: 'absolute', left: -50, top: 0, transformOrigin: 'left top', transform: 'rotate(-90deg) translate(-100%, 0)', fontFamily: SANS, fontWeight: 600, fontSize: 24, color: C.suave, opacity: ejes, whiteSpace: 'nowrap'}}>¿Explica la fatiga? →</div>
-        {causas.map((c, i) => {
-          // "el desalineamiento, la falta de procedimiento y el montaje apresurado…"
-          const ini = beats[2][[1, 3, 8][i]].ini - 2;
-          const s = spring({frame: f - ini, fps, config: {damping: 12, stiffness: 140}});
-          const brillo = historia;
-          return (
-            <div key={c.t} style={{position: 'absolute', left: c.x * W, top: c.y * H, display: 'flex', alignItems: 'center', gap: 14, transform: `scale(${s})`, transformOrigin: 'left center'}}>
-              <div style={{width: 30, height: 30, borderRadius: '50%', background: C.naranja, boxShadow: `0 0 ${16 + brillo * 20}px ${conAlfa(C.naranja, 0.8)}`, border: '4px solid #FFD9B8'}} />
-              <div style={{fontFamily: SANS, fontWeight: 600, fontSize: 28, color: C.texto, background: conAlfa(C.fondo, 0.85), padding: '6px 16px', borderRadius: 14, border: `1px solid ${C.borde}`, whiteSpace: 'nowrap'}}>{c.t}</div>
-            </div>
-          );
-        })}
-      </div>
+// =====================================================================
+// Escena 09 · jerarquización
+// =====================================================================
+// Posiciones ilustrativas de las causas evaluadas: [evidencia, explica la fatiga]
+const CAUSAS: [number, number][] = [
+  [0.18, 0.3], [0.42, 0.14], [0.82, 0.86], [0.3, 0.55], [0.6, 0.22], [0.12, 0.72],
+  [0.9, 0.76], [0.52, 0.42], [0.7, 0.5], [0.76, 0.93], [0.36, 0.84], [0.24, 0.12],
+];
+const ALTAS = [2, 9, 6]; // desalineamiento, procedimiento, montaje
 
-      {/* una sola historia */}
-      <div style={{position: 'absolute', left: SAFE_SIDE, top: 1062, fontFamily: HAND, fontWeight: 700, fontSize: 52, color: C.ambar, opacity: historia, transform: `translateY(${(1 - historia) * 20}px) rotate(-2deg)`}}>
-        Una sola historia:
-      </div>
-      {pasos.map((p, i) => {
-        const s = spring({frame: f - tPaso[i], fps, config: {damping: 14, stiffness: 120}});
-        const fin = i === 2;
-        const x = SAFE_SIDE + i * (cw + gap);
+const Jerarquizacion: React.FC = () => {
+  const f = useCurrentFrame();
+  const T = tiemposEscena(1);
+  const ox = 170, oy = 1400, aw = 800, ah = 560;
+  const ejeX = ap(f, T.b(1) - 2, 16);
+  const ejeY = ap(f, T.b(2) - 2, 16);
+  const aX = ap(f, T.w(1, 2), 18, Easing.inOut(Easing.cubic));
+  const aY = ap(f, T.w(2, 2), 18, Easing.inOut(Easing.cubic));
+  const zona = ap(f, T.b(3), 14);
+  const fueraGrafico = ap(f, T.b(4) - 4, 12);
+  const lupaX = interpolate(f, [T.b(1) - 6, T.b(2) + 6], [-200, 1200], {...CL, easing: Easing.inOut(Easing.quad)});
+
+  // tres causas: columnas (orden hablado) y luego orden de la historia
+  const cols = [205, 540, 875];
+  const yIcono = 1060;
+  const ordenHistoria = [2, 0, 1]; // desal→der, proc→izq, montaje→centro
+  const reordena = ap(f, T.b(8) - 6, 20, Easing.inOut(Easing.cubic));
+  const iconoX = (k: number) => mezcla(cols[k], cols[ordenHistoria[k]], reordena);
+  const iconoY = (k: number) => yIcono - Math.sin(Math.PI * reordena) * (k === 0 ? 200 : 110);
+  const tIcono = [T.b(4) + 2, T.w(5, 3), T.w(6, 2)];
+  const resalta = (k: number) => {
+    const tt = [T.w(10, 4), T.b(8) + 14, T.b(9)][k];
+    return rebote(f, tt, 16) * (1 - ap(f, tt + 30, 20)) * 0.12;
+  };
+
+  return (
+    <svg width={W} height={H} style={{position: 'absolute', inset: 0}}>
+      {/* gráfico evidencia × explica */}
+      <g opacity={1 - fueraGrafico} transform={`translate(0 ${-fueraGrafico * 80})`}>
+        <line x1={ox} y1={oy} x2={ox + aw * ejeX} y2={oy} stroke={P.tinta} strokeWidth={5} strokeLinecap="round" />
+        <line x1={ox} y1={oy} x2={ox} y2={oy - ah * ejeY} stroke={P.tinta} strokeWidth={5} strokeLinecap="round" />
+        <Mono x={ox + aw} y={oy + 48} texto="evidencia →" f={f} ini={T.w(1, 2)} color={P.tinta} ancla="end" />
+        <g transform={`translate(${ox - 26} ${oy - ah}) rotate(-90)`}>
+          <Mono x={0} y={0} texto="← ¿explica la fatiga?" f={f} ini={T.w(2, 2)} color={P.tinta} ancla="end" />
+        </g>
+        {zona > 0 && (
+          <g opacity={zona}>
+            <rect x={ox + aw * 0.62} y={oy - ah * 1.02} width={aw * 0.38 * zona + 20} height={ah * 0.36} rx={18} fill={P.naranja} fillOpacity={0.1} stroke={P.naranja} strokeWidth={5} strokeDasharray="14 10" />
+          </g>
+        )}
+        {CAUSAS.map(([ev, ex], i) => {
+          const x0 = 170 + i * 67;
+          const pop = rebote(f, T.b(0) + i * 2.2, 14);
+          const x = mezcla(x0, ox + ev * aw, aX);
+          const y = mezcla(1130, oy - 26, aX) - ex * ah * aY + (aY > 0 ? 0 : 0);
+          const alta = ALTAS.includes(i);
+          const gris = zona * (alta ? 0 : 1);
+          const r = 22 * pop * (alta ? 1 + zona * 0.35 : 1 - zona * 0.25);
+          return <circle key={i} cx={x} cy={aX < 1 ? y : y} r={Math.max(0, r)} fill={alta && zona > 0 ? P.naranja : gris > 0 ? '#BDB7AB' : P.tinta} />;
+        })}
+        {f > T.b(1) - 8 && f < T.b(2) + 8 && <Lupa x={lupaX} y={1130} s={0.95} />}
+      </g>
+      <g opacity={1 - ap(f, T.b(7) - 6, 10)}><Sello x={560} y={760} lineas={['prioridad', 'alta']} f={f} ini={T.w(3, 3)} ang={-6} ancho={520} /></g>
+
+      {/* las tres causas como iconos */}
+      {[0, 1, 2].map((k) => {
+        const ini = tIcono[k];
+        const p = rebote(f, ini, 16);
+        if (p <= 0) return null;
+        const x = iconoX(k);
+        const y = iconoY(k);
+        const s = p * 1.25 * (1 + resalta(k));
+        const etiqueta = ['desalineamiento', 'sin procedimiento', 'montaje apurado'][k];
+        const final = k === 0 && f >= T.w(10, 3);
         return (
-          <React.Fragment key={p}>
-            <div style={{position: 'absolute', left: x, top: 1150, width: cw, height: 200, borderRadius: 24, boxSizing: 'border-box', padding: '0 18px', display: 'flex', flexDirection: 'column', justifyContent: 'center', opacity: Math.min(1, s * 1.5), transform: `translateY(${(1 - s) * 40}px)`, background: fin ? `linear-gradient(135deg, ${C.rojo}, #B8262C)` : C.carta, border: `2px solid ${fin ? C.rojo : C.borde}`, boxShadow: '0 18px 40px rgba(0,0,0,0.35)'}}>
-              <div style={{fontFamily: SERIF, fontWeight: 800, fontSize: 40, color: fin ? '#FFE3E3' : C.naranja, lineHeight: 1}}>{i + 1}</div>
-              <div style={{fontFamily: SANS, fontWeight: 600, fontSize: 27, lineHeight: 1.15, color: C.texto, marginTop: 10}}>{p}</div>
-            </div>
-            {i < 2 && f >= tPaso[i + 1] - 6 && (
-              <svg style={{position: 'absolute', left: x + cw + 4, top: 1230, overflow: 'visible'}} width={gap - 8} height={40}>
-                <path d={`M 4 20 L ${(gap - 16) * aparece(f, tPaso[i + 1] - 6, 8)} 20`} stroke={C.ambar} strokeWidth={5} strokeLinecap="round" />
-                {f > tPaso[i + 1] && <path d={`M ${gap - 26} 8 L ${gap - 14} 20 L ${gap - 26} 32`} stroke={C.ambar} strokeWidth={5} fill="none" strokeLinecap="round" strokeLinejoin="round" />}
-              </svg>
-            )}
-          </React.Fragment>
+          <g key={k}>
+            <g transform={`translate(${x} ${y}) scale(${s})`}>
+              {k === 0 && <IconoDesalineado x={0} y={0} s={0.78} f={f} ang={7} />}
+              {k === 1 && <Portapapeles x={0} y={0} s={0.7} titulo="PROCEDIMIENTO" />}
+              {k === 2 && <Cronometro x={-14} y={0} s={0.66} f={f} vel={2.6} />}
+            </g>
+            <Mono x={x} y={y + 215} texto={etiqueta} f={f} ini={ini + 2} color={final ? P.naranja : P.tinta} ancla="middle" tam={26} />
+          </g>
         );
       })}
-    </>
+      {/* "una sola historia": hilo que las une */}
+      <g opacity={1 - ap(f, T.b(8) - 8, 8)}>
+        <Hilo d="M 0 820 C 120 820 120 1060 205 1060 S 380 820 540 820 S 700 1060 875 1060 S 1000 840 1080 820" p={ap(f, T.b(7), 34, Easing.inOut(Easing.cubic))} ancho={14} />
+      </g>
+      <Destello x={1000} y={830} f={f} ini={T.w(7, 3)} s={0.9} />
+      {/* flechas de la historia: procedimiento → montaje → desalineamiento */}
+      {[0, 1].map((i) => {
+        const t = [T.b(9), T.b(10)][i] - 4;
+        const p = ap(f, t, 10);
+        if (p <= 0) return null;
+        const x1 = cols[i] + 128, x2 = cols[i + 1] - 128;
+        const xe = mezcla(x1, x2, p);
+        return (
+          <g key={i} stroke={P.naranja} strokeWidth={12} strokeLinecap="round" strokeLinejoin="round" fill="none">
+            <line x1={x1} y1={yIcono} x2={xe} y2={yIcono} />
+            {p > 0.8 && <path d={`M ${xe - 22} ${yIcono - 22} L ${xe} ${yIcono} L ${xe - 22} ${yIcono + 22}`} />}
+          </g>
+        );
+      })}
+    </svg>
   );
 };
 
-const Cadena1: React.FC<{inicios: number[]; beats: Palabra[][]}> = ({inicios}) => (
-  <Cadena
-    inicios={inicios}
-    filas={[
-      {cartas: [{texto: 'El eje se fracturó por fatiga', tipo: 'problema', beat: 0}]},
-      {cartas: [{texto: 'Flexión cíclica en el eje', tipo: 'porque', beat: 1}]},
-      {cartas: [{texto: 'Desalineamiento motor – eje', tipo: 'porque', beat: 2}]},
-      {cartas: [{texto: 'El motor se montó sin alinear ni medir', tipo: 'porque', beat: 3}]},
-      {cartas: [{texto: 'No existe procedimiento obligatorio de montaje', tipo: 'raiz', beat: 4}, {texto: 'La planificación no daba tiempo', tipo: 'raiz', beat: 5}]},
-    ]}
-    alto={146}
-  />
-);
-
-const Cadena2: React.FC<{inicios: number[]; beats: Palabra[][]}> = ({inicios}) => (
-  <Cadena
-    inicios={inicios}
-    filas={[
-      {cartas: [{texto: 'Siguió operando con vibración y ruido', tipo: 'problema', beat: 0, extra: <Vibracion ini={inicios[0]} />}]},
-      {cartas: [{texto: 'Nadie tenía criterio para detenerlo', tipo: 'porque', beat: 1}]},
-      {cartas: [{texto: 'Sin medición de referencia', tipo: 'porque', beat: 2}, {texto: 'Sin límites de alarma', tipo: 'porque', beat: 3}]},
-      {cartas: [{texto: 'No existe protocolo de puesta en servicio y monitoreo de condición', tipo: 'raiz', beat: 4}]},
-    ]}
-    top={480}
-    alto={170}
-    hueco={64}
-  />
-);
-
-const CONTENIDO = [Jerarquizacion, Cadena1, Cadena2];
-
-/** Entrada y salida suaves de cada escena (se solapan TRANSICION frames). */
-const Transicion: React.FC<{dur: number; children: React.ReactNode; primera?: boolean}> = ({dur, children, primera}) => {
+// =====================================================================
+// Escena 10 · cadena 1
+// =====================================================================
+const CadenaFractura: React.FC = () => {
   const f = useCurrentFrame();
-  const entra = primera ? 1 : interpolate(f, [0, TRANSICION], [0, 1], {...CL, easing: salida});
-  const sale = Number.isFinite(dur) ? interpolate(f, [dur - TRANSICION, dur], [0, 1], {...CL, easing: Easing.in(Easing.cubic)}) : 0;
-  return <AbsoluteFill style={{opacity: entra * (1 - sale), transform: `translateX(${(1 - entra) * 120 - sale * 120}px)`}}>{children}</AbsoluteFill>;
+  const T = tiemposEscena(2);
+  const giro = f * 9;
+  const tGrieta = T.w(0, 3);
+  const flex = ap(f, T.b(1), 14) * (1 - ap(f, T.b(5) - 6, 10) * 0.6);
+  const curva = Math.sin(f / 4.2) * 26 * flex;
+  const des = ap(f, T.w(2, 3), 18, Easing.inOut(Easing.cubic));
+  // el motor se levanta y vuelve a caer (montaje)
+  const tM = T.b(3);
+  const sube = ap(f, tM - 2, 10, Easing.out(Easing.quad));
+  const cae = ap(f, tM + 12, 7, Easing.in(Easing.quad));
+  const altura = -320 * sube * (1 - cae);
+  const aplasta = f >= tM + 19 && f < tM + 27 ? Math.sin(((f - tM - 19) / 8) * Math.PI) * 0.06 : 0;
+  const motorAng = -4.5 * des;
+  const motorDy = -30 * des + altura;
+  // el conjunto se va al fondo cuando aparece el procedimiento
+  const fondoP = ap(f, T.b(5) - 6, 16, Easing.inOut(Easing.cubic));
+  const conj = {y: fondoP * 380, s: 1.18 - fondoP * 0.5, o: 1 - fondoP * 0.88};
+  const mx = 440, my = 1110;
+  // extremo del eje del motor (sigue al motor inclinado)
+  const rad = (motorAng * Math.PI) / 180;
+  const ex = mx + Math.cos(rad) * 6, ey = my + motorDy + Math.sin(rad) * 6;
+  const burbuja = ap(f, tGrieta + 8, 14) * (1 - ap(f, T.b(1) + 4, 10));
+  const nPorque = [T.b(1), T.b(2), T.b(3), T.b(5), T.b(6)].filter((t) => f >= t).length;
+
+  return (
+    <svg width={W} height={H} style={{position: 'absolute', inset: 0}}>
+      <g transform={`translate(${W / 2} ${my + conj.y}) scale(${conj.s}) translate(${-W / 2} ${-my})`} opacity={conj.o}>
+        <ellipse cx={620} cy={1262} rx={460} ry={24} fill="#000" opacity={0.4} />
+        {/* línea de centros de la máquina conducida (lima) y del motor (naranja) */}
+        {des > 0 && (
+          <g opacity={des}>
+            <line x1={80} y1={my} x2={1040} y2={my} stroke={P.lima} strokeWidth={4} strokeDasharray="16 12" />
+            <line x1={80} y1={my} x2={1040} y2={my} stroke={P.naranja} strokeWidth={4} strokeDasharray="16 12" transform={`rotate(${motorAng} ${mx} ${my + motorDy})`} />
+            <Mono x={1020} y={my - 60} texto="desalineado" f={f} ini={T.w(2, 3) + 6} color={P.naranja} ancla="end" />
+          </g>
+        )}
+        <Eje x1={ex} x2={1000} y={ey} y2={my} curva={curva} giro={giro} grosor={46} />
+        <Grieta x={700} y={(ey + my) / 2 + curva * 1.0} alto={56 + Math.abs(curva) * 0.3} p={ap(f, tGrieta, 12)} />
+        <Bloque x={880} y={my - 40} w={86} h={150} c={P.azul} trama="tramaAzul" rx={10} />
+        <circle cx={923} cy={my} r={34} fill={P.azulOsc} />
+        {/* flechas de flexión */}
+        {flex > 0.05 && (
+          <g stroke={P.lima} strokeWidth={8} fill="none" strokeLinecap="round" opacity={flex}>
+            <path d={`M 600 ${my - 110} Q 700 ${my - 140 - curva} 800 ${my - 110}`} />
+            <path d={`M 785 ${my - 128} L 802 ${my - 108} L 778 ${my - 98}`} />
+            <path d={`M 600 ${my + 110} Q 700 ${my + 140 - curva} 800 ${my + 110}`} />
+          </g>
+        )}
+        <g transform={`translate(${mx} ${my + motorDy}) scale(${1 + aplasta} ${1 - aplasta}) translate(${-mx} ${-(my + motorDy)})`}>
+          <Motor x={mx} y={my + motorDy} ang={motorAng} f={f} fondo="noche" />
+        </g>
+        {/* polvo del golpe */}
+        {f >= tM + 19 && f < tM + 40 && [0, 1, 2, 3, 4, 5].map((i) => {
+          const t = (f - tM - 19) / 21;
+          const lado = i < 3 ? -1 : 1;
+          return <circle key={i} cx={mx - 130 + lado * (150 + t * (80 + i * 25))} cy={my + 120 - t * (20 + (i % 3) * 18)} r={(10 - (i % 3) * 2) * (1 - t)} fill={P.crema} />;
+        })}
+      </g>
+      {/* zoom a la superficie de fractura */}
+      {burbuja > 0 && (
+        <g opacity={burbuja} transform={`translate(780 780) scale(${0.6 + 0.4 * burbuja})`}>
+          <line x1={-40} y1={150} x2={-80} y2={300} stroke={P.crema} strokeWidth={3} strokeDasharray="6 8" />
+          <circle r={150} fill={P.metal} stroke={P.crema} strokeWidth={6} />
+          {[0, 1, 2, 3, 4, 5].map((i) => {
+            const p = ap(f, tGrieta + 10 + i * 3, 8);
+            const r = 40 + i * 30;
+            return <path key={i} d={`M ${-150} ${-150 + r} A ${r} ${r} 0 0 0 ${-150 + r} ${-150}`} transform="translate(0 0)" stroke={P.azul} strokeWidth={5} fill="none" opacity={p} clipPath="url(#corteFractura)" />;
+          })}
+          <clipPath id="corteFractura"><circle r={146} /></clipPath>
+          <path d="M 40 150 A 150 150 0 0 0 150 40 L 150 150 Z" fill={P.naranja} opacity={ap(f, tGrieta + 30, 8)} clipPath="url(#corteFractura)" />
+          <circle cx={-118} cy={-118} r={10} fill={P.naranja} />
+        </g>
+      )}
+      {/* sin alinear ni medir */}
+      {f >= T.w(4, 3) - 4 && f < T.b(5) + 4 && (
+        <g opacity={1 - ap(f, T.b(5) - 6, 8)}>
+          <g transform={`translate(0 ${(1 - rebote(f, T.w(4, 3) - 4, 14)) * 60})`}>
+            <Comparador x={700} y={800} s={1.05} f={f} />
+          </g>
+          <Equis x={700} y={800} r={90} p={ap(f, T.w(4, 3) + 4, 10)} />
+        </g>
+      )}
+      {/* causa raíz: no hay procedimiento + no había tiempo */}
+      {f >= T.w(5, 3) - 4 && (
+        <g transform={`translate(0 ${(1 - rebote(f, T.w(5, 3) - 4, 16)) * 900})`}>
+          <Portapapeles x={320} y={960} s={1.4} titulo="MONTAJE" ang={-4} />
+        </g>
+      )}
+      <Sello x={320} y={1000} lineas={['no', 'existe']} f={f} ini={T.w(5, 2) + 14} ancho={340} ang={-10} />
+      {f >= T.w(6, 2) - 4 && (
+        <g transform={`translate(780 960) scale(${rebote(f, T.w(6, 2) - 4, 16)})`}>
+          <Cronometro x={0} y={0} s={1.2} f={f} vel={4} />
+        </g>
+      )}
+      <Mono x={320} y={1270} texto="causa raíz" f={f} ini={T.w(6, 5)} color={P.naranja} ancla="middle" />
+      <Mono x={780} y={1270} texto="causa raíz" f={f} ini={T.w(6, 5) + 6} color={P.naranja} ancla="middle" />
+      <Destello x={550} y={1262} f={f} ini={T.w(6, 5) + 12} s={0.7} />
+      {/* contador de ¿por qué? */}
+      <g transform="translate(0 0)" opacity={ap(f, T.b(1) - 6, 10)}>
+        <Mono x={MARGEN} y={1488} texto={`¿por qué? ${nPorque} de 5`} f={f} ini={T.b(1) - 6} color={P.crema} tam={26} />
+        {[0, 1, 2, 3, 4].map((i) => (
+          <circle key={i} cx={W - MARGEN - 16 - (4 - i) * 46} cy={1480} r={i < nPorque ? 15 : 10} fill={i < nPorque ? P.lima : 'none'} stroke={P.crema} strokeOpacity={0.5} strokeWidth={i < nPorque ? 0 : 3} />
+        ))}
+      </g>
+    </svg>
+  );
 };
 
-/** Rangos (frames globales) en que suena la voz, para bajar la música debajo. */
-const rangosVoz = () => {
-  const {inicios} = inicioEscenas();
-  return LAMINAS.map((_, i) => [inicios[i + 1] + VOZ, inicios[i + 1] + tiemposLamina(i).finVoz] as const);
+// =====================================================================
+// Escena 11 · cadena 2
+// =====================================================================
+const CadenaOperacion: React.FC = () => {
+  const f = useCurrentFrame();
+  const T = tiemposEscena(3);
+  const giro = f * 10;
+  const vib = ap(f, T.w(1, 1), 20) * 14;
+  const sinMaquina = ap(f, T.b(3) - 6, 14, Easing.inOut(Easing.cubic));
+  const caer = ap(f, T.w(5, 2) - 2, 16, Easing.in(Easing.cubic));
+  const ox = 150, oy = 1400, aw = 820, ah = 560;
+  const graf = ap(f, T.b(3) - 2, 16);
+  const ondaP = ap(f, T.b(3) + 4, 120, Easing.linear);
+  const amp = (x: number) => 14 + x * x * 200 * Math.min(1, ondaP * 1.4);
+  const limite = ap(f, T.w(4, 1), 14);
+  const tachado = ap(f, T.w(4, 3) + 2, 10);
+  const nPorque = [T.b(2), T.b(3), T.b(4), T.b(6)].filter((t) => f >= t).length + (f >= T.b(1) ? 1 : 0);
+  const caida = (i: number) => caer * (1400 + i * 120);
+  const giroCaida = (i: number) => caer * (i % 2 ? 24 : -18);
+
+  return (
+    <svg width={W} height={H} style={{position: 'absolute', inset: 0}}>
+      {/* máquina funcionando con vibración y ruido */}
+      <g opacity={1 - sinMaquina} transform={`translate(${W / 2} 1000) scale(${1.15 - sinMaquina * 0.5}) translate(${-W / 2} -1060) translate(0 ${-sinMaquina * 220})`}>
+        <ellipse cx={600} cy={1210} rx={440} ry={22} fill="#000" opacity={0.14} />
+        <Eje x1={470} x2={760} y={1060} giro={giro} grosor={42} />
+        {/* bomba */}
+        <g transform={`translate(${vib ? (random(`b${f}`) - 0.5) * vib * 0.6 : 0} 0)`}>
+          <Bloque x={740} y={980} w={190} h={170} c={P.naranja} trama="tramaNaranja" rx={80} />
+          <circle cx={835} cy={1065} r={46} fill={P.papel} />
+          <g transform={`translate(835 1065) rotate(${giro * 2})`}>
+            {[0, 60, 120, 180, 240, 300].map((a) => <rect key={a} x={-4} y={-40} width={8} height={40} fill={P.tinta} transform={`rotate(${a})`} />)}
+          </g>
+          <rect x={790} y={1150} width={90} height={40} fill={P.tinta} />
+        </g>
+        <Motor x={470} y={1060} f={f} fondo="papel" vib={vib} />
+        {/* arcos de vibración */}
+        {vib > 1 && [0, 1, 2].map((i) => {
+          const t = ((f / 9 + i / 3) % 1);
+          return (
+            <g key={i} opacity={(1 - t) * (vib / 14)} stroke={P.naranja} strokeWidth={7} fill="none" strokeLinecap="round">
+              <path d={`M ${120 - t * 80} ${990} Q ${90 - t * 90} ${1060} ${120 - t * 80} ${1130}`} />
+              <path d={`M ${960 + t * 80} ${990} Q ${990 + t * 90} ${1060} ${960 + t * 80} ${1130}`} />
+            </g>
+          );
+        })}
+        {/* ondas de ruido */}
+        {f >= T.w(1, 3) && [0, 1, 2].map((i) => {
+          const t = (((f - T.w(1, 3)) / 24 + i / 3) % 1);
+          return <circle key={i} cx={330} cy={900} r={40 + t * 160} fill="none" stroke={P.tinta} strokeWidth={5} opacity={(1 - t) * 0.6} strokeDasharray="4 14" strokeLinecap="round" />;
+        })}
+      </g>
+
+      {/* nadie tenía criterio para detenerlo */}
+      {f >= T.b(2) - 4 && (
+        <g opacity={1 - sinMaquina}>
+          {[0, 1, 2, 3, 4, 5, 6].map((i) => {
+            const x = 180 + i * 120;
+            const p = rebote(f, T.b(2) + i * 2, 14);
+            const q = rebote(f, T.w(2, 3) + i * 2.5, 12);
+            return (
+              <g key={i} transform={`translate(${x} ${1360}) scale(${p})`}>
+                <circle cx={0} cy={0} r={22} fill={P.tinta} />
+                <path d="M -32 70 Q 0 20 32 70 Z" fill={P.tinta} />
+                {q > 0 && <text x={0} y={-40} textAnchor="middle" fontFamily={GROTESK} fontWeight={900} fontSize={52 * q} fill={i % 3 === 1 ? P.azul : P.tinta}>?</text>}
+              </g>
+            );
+          })}
+          <g transform={`translate(860 780) scale(${rebote(f, T.w(2, 5) - 2, 14)}) rotate(${Math.sin(f / 3) * 3})`}>
+            <circle r={92} fill={P.tinta} />
+            <circle r={74} fill={P.naranja} />
+            <circle r={74} fill="url(#tramaNaranja)" mask="url(#mitadAbajo)" />
+            <text y={14} textAnchor="middle" fontFamily={GROTESK} fontWeight={900} fontSize={38} fill={P.papel} style={{fontStretch: '115%'}}>STOP</text>
+          </g>
+        </g>
+      )}
+
+      {/* gráfico: sin referencia y sin límite de alarma */}
+      {graf > 0 && (
+        <g transform={`translate(0 ${caida(0)}) rotate(${giroCaida(0)} 540 1100)`}>
+          <line x1={ox} y1={oy} x2={ox + aw * graf} y2={oy} stroke={P.tinta} strokeWidth={5} strokeLinecap="round" />
+          <line x1={ox} y1={oy} x2={ox} y2={oy - ah * graf} stroke={P.tinta} strokeWidth={5} strokeLinecap="round" />
+          <Mono x={ox + aw} y={oy + 46} texto="tiempo →" f={f} ini={T.b(3)} color={P.tinta} ancla="end" />
+          <g transform={`translate(${ox - 24} ${oy - ah}) rotate(-90)`}>
+            <Mono x={0} y={0} texto="vibración →" f={f} ini={T.b(3) + 4} color={P.tinta} ancla="end" />
+          </g>
+          <OndaVib x0={ox + 10} y={oy - 150} w={aw - 20} amp={amp} fase={f / 2.5} p={ondaP} color={P.naranja} />
+          {/* referencia: no existe */}
+          <g opacity={ap(f, T.w(3, 4) - 2, 8) * (0.5 + 0.5 * Math.sin(f / 3))}>
+            <line x1={ox} y1={oy - 150} x2={ox + aw} y2={oy - 150} stroke={P.azul} strokeWidth={4} strokeDasharray="10 12" />
+          </g>
+          <Mono x={ox + aw} y={oy - 166} texto="referencia: ¿?" f={f} ini={T.w(3, 4)} color={P.azul} ancla="end" />
+          {/* límite de alarma tachado */}
+          {limite > 0 && (
+            <g opacity={limite}>
+              <line x1={ox} y1={oy - 420} x2={ox + aw * limite} y2={oy - 420} stroke={P.tinta} strokeWidth={5} strokeDasharray="18 12" />
+              <Mono x={ox + 10} y={oy - 440} texto="límite de alarma" f={f} ini={T.w(4, 1)} color={P.tinta} />
+              <line x1={ox} y1={oy - 448} x2={ox + 290 * tachado} y2={oy - 448 - 2} stroke={P.naranja} strokeWidth={8} strokeLinecap="round" />
+            </g>
+          )}
+        </g>
+      )}
+      <g transform={`translate(0 ${caida(1)})`}>
+        <Destello x={860} y={870} f={f} ini={T.w(4, 3) + 8} s={0.8} />
+      </g>
+
+      {/* en el fondo: no existe protocolo */}
+      {f >= T.w(6, 3) - 6 && (
+        <g transform={`translate(0 ${(1 - rebote(f, T.w(6, 3) - 6, 18)) * 1000})`}>
+          <Portapapeles x={540} y={1070} s={1.6} titulo="PROTOCOLO" ang={3} />
+          <Mono x={540} y={1390} texto="puesta en servicio" f={f} ini={T.w(6, 7)} color={P.tinta} ancla="middle" />
+          <Mono x={540} y={1430} texto="+ monitoreo de condición" f={f} ini={T.w(6, 9)} color={P.tinta} ancla="middle" />
+        </g>
+      )}
+      <Sello x={540} y={1100} lineas={['no', 'existe']} f={f} ini={T.w(6, 1) + 18} ancho={380} ang={-9} />
+      <Mono x={540} y={1505} texto="causa raíz" f={f} ini={T.finVoz + 6} color={P.naranja} ancla="middle" tam={34} />
+      <Destello x={730} y={1492} f={f} ini={T.finVoz + 14} s={0.8} />
+      {/* contador */}
+      <g opacity={ap(f, T.b(1) - 6, 10) * (1 - caer)}>
+        <Mono x={MARGEN} y={1488} texto={`¿por qué? ${nPorque} de 5`} f={f} ini={T.b(1) - 6} color={P.tinta} tam={26} />
+        {[0, 1, 2, 3, 4].map((i) => (
+          <circle key={i} cx={W - MARGEN - 16 - (4 - i) * 46} cy={1480} r={i < nPorque ? 15 : 10} fill={i < nPorque ? P.naranja : 'none'} stroke={P.tinta} strokeOpacity={0.4} strokeWidth={i < nPorque ? 0 : 3} />
+        ))}
+      </g>
+    </svg>
+  );
+};
+
+const VISUAL = [Portada, Jerarquizacion, CadenaFractura, CadenaOperacion];
+
+/** Transición: la escena nueva sube con borde ondulado, como papel que tapa al anterior. */
+const Onda: React.FC<{children: React.ReactNode; activa: boolean}> = ({children, activa}) => {
+  const f = useCurrentFrame();
+  if (!activa) return <AbsoluteFill>{children}</AbsoluteFill>;
+  const p = ap(f, 0, ONDA, Easing.inOut(Easing.cubic));
+  if (p >= 1) return <AbsoluteFill>{children}</AbsoluteFill>;
+  const base = H + 80 - (H + 200) * p;
+  let d = `M 0 ${H} L 0 ${base}`;
+  for (let x = 0; x <= W; x += 30) d += ` L ${x} ${(base + Math.sin(x / 70 + p * 6) * 34 + Math.sin(x / 23) * 8).toFixed(1)}`;
+  d += ` L ${W} ${H} Z`;
+  return <AbsoluteFill style={{clipPath: `path('${d}')`}}>{children}</AbsoluteFill>;
 };
 
 export const Analisis: React.FC<{musica?: string | null; voz?: boolean}> = ({musica = 'musica.mp3', voz = true}) => {
   cargarFuentes();
   const {durationInFrames} = useVideoConfig();
   const {inicios} = inicioEscenas();
-  const rangos = rangosVoz();
+  const rangos = ESCENAS.map((_, i) => [inicios[i] + VOZ, inicios[i] + tiemposEscena(i).finVoz] as const);
   const volumenMusica = (f: number) => {
-    const fade = interpolate(f, [0, 20, durationInFrames - 45, durationInFrames], [0, 1, 1, 0], CL);
-    if (!voz) return 0.5 * fade;
-    // baja a 0.12 mientras habla y sube a 0.42 en las pausas, con rampas de ~0.4 s
-    const cerca = Math.max(...rangos.map(([a, b]) => interpolate(f, [a - 12, a, b, b + 12], [0, 1, 1, 0], CL)));
-    return (0.42 - 0.3 * cerca) * fade;
+    const fade = interpolate(f, [0, 12, durationInFrames - 50, durationInFrames - 4], [0, 1, 1, 0], CL);
+    if (!voz) return 0.55 * fade;
+    const habla = Math.max(...rangos.map(([a, b]) => interpolate(f, [a - 10, a, b, b + 14], [0, 1, 1, 0], CL)));
+    return (0.5 - 0.32 * habla) * fade;
   };
   return (
-    <AbsoluteFill style={{background: C.fondo}}>
-      <Fondo />
+    <AbsoluteFill style={{background: P.noche}}>
+      <Defs />
       {musica && <Audio src={staticFile(musica)} volume={volumenMusica} />}
-      <Sequence durationInFrames={INTRO}>
-        <Transicion dur={INTRO} primera>
-          <Portada />
-        </Transicion>
-      </Sequence>
-      {LAMINAS.map((l, i) => {
-        const dur = duracionLamina(i);
-        const Contenido = CONTENIDO[i];
-        const t = tiemposLamina(i);
-        const ultima = i === LAMINAS.length - 1;
+      {ESCENAS.map((e, i) => {
+        const t = tiemposEscena(i);
+        const ultima = i === ESCENAS.length - 1;
+        const dur = ultima ? durationInFrames - inicios[i] : t.finVoz + e.cola;
         return (
-          <Sequence key={l.numero} from={inicios[i + 1]} durationInFrames={ultima ? durationInFrames - inicios[i + 1] : dur}>
-            <Transicion dur={ultima ? Infinity : dur}>
-              <Encabezado numero={l.numero} titulo={l.titulo} bajada={l.bajada} activa={i} />
+          <Sequence key={e.id} from={inicios[i]} durationInFrames={dur}>
+            <Onda activa={i > 0}>
+              <FondoPlano fondo={e.fondo} />
+              {React.createElement(VISUAL[i])}
+              <Titulares frases={t.frases} fondo={e.fondo} />
+              <Etiqueta texto={e.etiqueta} fondo={e.fondo} activa={i - 1} />
+              <Grano fondo={e.fondo} />
               {voz && (
                 <Sequence from={VOZ} layout="none">
                   <Audio src={staticFile(t.audio)} />
                 </Sequence>
               )}
-              <Contenido inicios={t.inicios} beats={t.beats} />
-              <Subtitulos beats={t.beats} inicios={t.inicios} />
-            </Transicion>
+            </Onda>
           </Sequence>
         );
       })}
+      <FundidoFinal />
     </AbsoluteFill>
   );
+};
+
+const FundidoFinal: React.FC = () => {
+  const f = useCurrentFrame();
+  const {durationInFrames} = useVideoConfig();
+  const o = interpolate(f, [durationInFrames - 22, durationInFrames - 2], [0, 1], CL);
+  return o > 0 ? <AbsoluteFill style={{background: P.noche, opacity: o}} /> : null;
 };
