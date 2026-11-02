@@ -17,7 +17,11 @@ async function main() {
   if (!browserExecutable) await ensureBrowser();
   const chromeMode = browserExecutable ? 'chrome-for-testing' : 'headless-shell';
   console.log('📦 Empaquetando plantilla…');
-  const serveUrl = await bundle({entryPoint: path.join(RAIZ, 'src', 'index.ts')});
+  const publicDir = path.join(DIR_TMP, 'analisis', 'public');
+  fs.rmSync(publicDir, {recursive: true, force: true});
+  fs.mkdirSync(publicDir, {recursive: true});
+  for (const f of fs.readdirSync(path.join(RAIZ, 'analisis'))) if (/\.(wav|mp3)$/i.test(f)) fs.copyFileSync(path.join(RAIZ, 'analisis', f), path.join(publicDir, f));
+  const serveUrl = await bundle({entryPoint: path.join(RAIZ, 'src', 'index.ts'), publicDir});
   const comp = await selectComposition({serveUrl, id: 'Analisis', inputProps: {}, browserExecutable, chromeMode});
   if (still !== undefined) {
     for (const fr of still.split(',')) {

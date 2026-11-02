@@ -4,14 +4,16 @@
  * dispara la animación del elemento que le corresponde en pantalla.
  */
 
-export const FRAMES_POR_PALABRA = 10.5; // ~2,9 palabras por segundo a 30 fps
-export const PAUSA_BEAT = 12;
+import tiempos from '../../analisis/tiempos.json';
+
+export const FPS_GUION = 30;
 export const INTRO = 84;
-export const COLA = 36; // tiempo extra al final de cada lámina antes de pasar a la siguiente
+export const VOZ = 26; // la voz parte cuando ya entró el encabezado
+export const COLA = 54; // pausa al final de cada lámina antes de pasar a la siguiente
 export const TRANSICION = 14;
 
 export const palabras = (t: string) => t.trim().split(/\s+/);
-export const duracionBeat = (t: string) => Math.max(40, Math.round(palabras(t).length * FRAMES_POR_PALABRA) + PAUSA_BEAT);
+const aFrames = (ms: number) => Math.round((ms / 1000) * FPS_GUION);
 
 export type Lamina = {
   numero: string;
@@ -60,27 +62,37 @@ export const LAMINAS: Lamina[] = [
   },
 ];
 
-/** Inicio (relativo a la lámina) de cada beat. */
-export const iniciosBeats = (l: Lamina) => {
-  const out: number[] = [];
-  let t = 26; // deja entrar el encabezado antes de la primera frase
-  for (const b of l.beats) {
-    out.push(t);
-    t += duracionBeat(b);
-  }
-  return {inicios: out, fin: t};
+export type Palabra = {texto: string; ini: number; fin: number};
+
+/**
+ * Tiempos (en frames, relativos a la lámina) de cada beat y de cada palabra,
+ * tomados de la narración real (analisis/tiempos.json).
+ */
+export const tiemposLamina = (i: number) => {
+  const l = LAMINAS[i];
+  const t = tiempos.laminas[i];
+  const total = l.beats.reduce((n, b) => n + palabras(b).length, 0);
+  if (total !== t.palabras.length) throw new Error(`Lámina ${l.numero}: el guion tiene ${total} palabras y tiempos.json ${t.palabras.length}`);
+  let k = 0;
+  const beats = l.beats.map((b) =>
+    palabras(b).map((texto) => {
+      const [ini, fin] = t.palabras[k++];
+      return {texto, ini: VOZ + aFrames(ini), fin: VOZ + aFrames(fin)} as Palabra;
+    }),
+  );
+  return {beats, inicios: beats.map((ps) => ps[0].ini - 3), finVoz: VOZ + aFrames(t.duracion_ms), audio: t.audio};
 };
 
-export const duracionLamina = (l: Lamina) => iniciosBeats(l).fin + COLA;
+export const duracionLamina = (i: number) => tiemposLamina(i).finVoz + COLA;
 
 /** Frame global en que empieza cada escena (intro + láminas), con solape para la transición. */
 export const inicioEscenas = () => {
   const out = [0];
   let t = INTRO - TRANSICION;
-  for (const l of LAMINAS) {
+  LAMINAS.forEach((_, i) => {
     out.push(t);
-    t += duracionLamina(l) - TRANSICION;
-  }
+    t += duracionLamina(i) - TRANSICION;
+  });
   return {inicios: out, total: t + TRANSICION};
 };
 

@@ -1,7 +1,8 @@
 import React from 'react';
-import {AbsoluteFill, Easing, interpolate, Sequence, spring, useCurrentFrame, useVideoConfig} from 'remotion';
+import {AbsoluteFill, Audio, Easing, interpolate, Sequence, spring, staticFile, useCurrentFrame, useVideoConfig} from 'remotion';
 import {cargarFuentes, conAlfa, SAFE_SIDE, WIDTH} from '../theme';
-import {duracionBeat, duracionLamina, iniciosBeats, inicioEscenas, INTRO, LAMINAS, palabras, TRANSICION} from './guion';
+import {duracionLamina, inicioEscenas, INTRO, LAMINAS, tiemposLamina, TRANSICION, VOZ} from './guion';
+import type {Palabra} from './guion';
 
 // ---------- paleta "plano técnico" ----------
 const C = {
@@ -74,28 +75,25 @@ const Encabezado: React.FC<{numero: string; titulo: string; bajada: string; acti
 };
 
 // ---------- subtítulos palabra a palabra ----------
-const Subtitulos: React.FC<{beats: string[]; inicios: number[]}> = ({beats, inicios}) => {
+const Subtitulos: React.FC<{beats: Palabra[][]; inicios: number[]}> = ({beats, inicios}) => {
   const f = useCurrentFrame();
   let i = -1;
   for (let k = 0; k < inicios.length; k++) if (f >= inicios[k] - 2) i = k;
   if (i < 0) return null;
-  const texto = beats[i];
-  const dur = duracionBeat(texto);
-  const local = f - inicios[i];
-  const ws = palabras(texto);
-  const paso = (dur - 12) / ws.length;
-  const entra = aparece(f, inicios[i] - 2, 8);
-  const sale = i === beats.length - 1 ? 0 : interpolate(local, [dur - 6, dur], [0, 1], CL);
+  const ws = beats[i];
+  const fin = i < beats.length - 1 ? inicios[i + 1] - 2 : Infinity;
+  const entra = aparece(f, inicios[i] - 2, 5);
+  const sale = Number.isFinite(fin) ? interpolate(f, [fin - 3, fin], [0, 1], CL) : 0;
   return (
     <div style={{position: 'absolute', left: SAFE_SIDE, right: SAFE_SIDE, top: 1450, height: 190, display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: entra * (1 - sale)}}>
       <div style={{fontFamily: SANS, fontWeight: 600, fontSize: 44, lineHeight: 1.32, textAlign: 'center', color: C.texto, textShadow: '0 4px 18px rgba(0,0,0,0.6)'}}>
         {ws.map((w, k) => {
-          const t = local - k * paso;
-          const on = interpolate(t, [0, 5], [0, 1], CL);
-          const activa = t >= 0 && t < paso + 2;
+          const on = interpolate(f, [w.ini - 1, w.ini + 3], [0, 1], CL);
+          const sig = k < ws.length - 1 ? ws[k + 1].ini : w.fin + 4;
+          const activa = f >= w.ini - 1 && f < sig;
           return (
             <span key={k} style={{opacity: 0.28 + on * 0.72, color: activa ? C.ambar : C.texto, display: 'inline-block', transform: `translateY(${(1 - on) * 8}px)`, marginRight: 12}}>
-              {w}
+              {w.texto}
             </span>
           );
         })}
@@ -139,6 +137,7 @@ const Flecha: React.FC<{x: number; y1: number; y2: number; ini: number; color?: 
   const f = useCurrentFrame();
   const p = aparece(f, ini, 10);
   const largo = (y2 - y1 - 14) * p;
+  if (p <= 0) return null;
   return (
     <svg style={{position: 'absolute', left: x - 20, top: y1, overflow: 'visible'}} width={40} height={y2 - y1}>
       <line x1={20} y1={0} x2={20} y2={largo} stroke={color} strokeWidth={4} strokeDasharray="2 10" strokeLinecap="round" />
@@ -294,7 +293,7 @@ const Portada: React.FC = () => {
 };
 
 /** Lámina 9: matriz evidencia × explica la fatiga, y la historia que une las tres causas. */
-const Jerarquizacion: React.FC<{inicios: number[]}> = ({inicios}) => {
+const Jerarquizacion: React.FC<{inicios: number[]; beats: Palabra[][]}> = ({inicios, beats}) => {
   const f = useCurrentFrame();
   const {fps} = useVideoConfig();
   const X = SAFE_SIDE + 46;
@@ -313,9 +312,8 @@ const Jerarquizacion: React.FC<{inicios: number[]}> = ({inicios}) => {
   const pasos = ['Sin procedimiento', 'Montaje sin alinear', 'Desalineamiento'];
   const cw = 268;
   const gap = (W + 46 - cw * 3) / 2;
-  const palabrasB4 = palabras(LAMINAS[0].beats[4]).length;
-  const ritmo = (duracionBeat(LAMINAS[0].beats[4]) - 12) / palabrasB4;
-  const tPaso = [inicios[4], inicios[4] + Math.round(ritmo * 3), inicios[4] + Math.round(ritmo * 7)];
+  // "sin procedimiento, | se montó sin alinear, | y eso generó el desalineamiento."
+  const tPaso = [beats[4][0].ini - 2, beats[4][2].ini - 2, beats[4][8].ini - 2];
   return (
     <>
       {/* matriz */}
@@ -329,8 +327,8 @@ const Jerarquizacion: React.FC<{inicios: number[]}> = ({inicios}) => {
         <div style={{position: 'absolute', right: 0, bottom: -50, fontFamily: SANS, fontWeight: 600, fontSize: 24, color: C.suave, opacity: ejes}}>Evidencia →</div>
         <div style={{position: 'absolute', left: -50, top: 0, transformOrigin: 'left top', transform: 'rotate(-90deg) translate(-100%, 0)', fontFamily: SANS, fontWeight: 600, fontSize: 24, color: C.suave, opacity: ejes, whiteSpace: 'nowrap'}}>¿Explica la fatiga? →</div>
         {causas.map((c, i) => {
-          const ritmo2 = (duracionBeat(LAMINAS[0].beats[2]) - 12) / palabras(LAMINAS[0].beats[2]).length;
-          const ini = inicios[2] + Math.round([0, 2, 6][i] * ritmo2);
+          // "el desalineamiento, la falta de procedimiento y el montaje apresurado…"
+          const ini = beats[2][[1, 3, 8][i]].ini - 2;
           const s = spring({frame: f - ini, fps, config: {damping: 12, stiffness: 140}});
           const brillo = historia;
           return (
@@ -369,7 +367,7 @@ const Jerarquizacion: React.FC<{inicios: number[]}> = ({inicios}) => {
   );
 };
 
-const Cadena1: React.FC<{inicios: number[]}> = ({inicios}) => (
+const Cadena1: React.FC<{inicios: number[]; beats: Palabra[][]}> = ({inicios}) => (
   <Cadena
     inicios={inicios}
     filas={[
@@ -383,7 +381,7 @@ const Cadena1: React.FC<{inicios: number[]}> = ({inicios}) => (
   />
 );
 
-const Cadena2: React.FC<{inicios: number[]}> = ({inicios}) => (
+const Cadena2: React.FC<{inicios: number[]; beats: Palabra[][]}> = ({inicios}) => (
   <Cadena
     inicios={inicios}
     filas={[
@@ -408,29 +406,49 @@ const Transicion: React.FC<{dur: number; children: React.ReactNode; primera?: bo
   return <AbsoluteFill style={{opacity: entra * (1 - sale), transform: `translateX(${(1 - entra) * 120 - sale * 120}px)`}}>{children}</AbsoluteFill>;
 };
 
-export const Analisis: React.FC = () => {
+/** Rangos (frames globales) en que suena la voz, para bajar la música debajo. */
+const rangosVoz = () => {
+  const {inicios} = inicioEscenas();
+  return LAMINAS.map((_, i) => [inicios[i + 1] + VOZ, inicios[i + 1] + tiemposLamina(i).finVoz] as const);
+};
+
+export const Analisis: React.FC<{musica?: string | null; voz?: boolean}> = ({musica = 'musica.mp3', voz = true}) => {
   cargarFuentes();
   const {durationInFrames} = useVideoConfig();
   const {inicios} = inicioEscenas();
+  const rangos = rangosVoz();
+  const volumenMusica = (f: number) => {
+    const fade = interpolate(f, [0, 20, durationInFrames - 45, durationInFrames], [0, 1, 1, 0], CL);
+    if (!voz) return 0.5 * fade;
+    // baja a 0.12 mientras habla y sube a 0.42 en las pausas, con rampas de ~0.4 s
+    const cerca = Math.max(...rangos.map(([a, b]) => interpolate(f, [a - 12, a, b, b + 12], [0, 1, 1, 0], CL)));
+    return (0.42 - 0.3 * cerca) * fade;
+  };
   return (
     <AbsoluteFill style={{background: C.fondo}}>
       <Fondo />
+      {musica && <Audio src={staticFile(musica)} volume={volumenMusica} />}
       <Sequence durationInFrames={INTRO}>
         <Transicion dur={INTRO} primera>
           <Portada />
         </Transicion>
       </Sequence>
       {LAMINAS.map((l, i) => {
-        const dur = duracionLamina(l);
+        const dur = duracionLamina(i);
         const Contenido = CONTENIDO[i];
-        const beats = iniciosBeats(l).inicios;
+        const t = tiemposLamina(i);
         const ultima = i === LAMINAS.length - 1;
         return (
           <Sequence key={l.numero} from={inicios[i + 1]} durationInFrames={ultima ? durationInFrames - inicios[i + 1] : dur}>
             <Transicion dur={ultima ? Infinity : dur}>
               <Encabezado numero={l.numero} titulo={l.titulo} bajada={l.bajada} activa={i} />
-              <Contenido inicios={beats} />
-              <Subtitulos beats={l.beats} inicios={beats} />
+              {voz && (
+                <Sequence from={VOZ} layout="none">
+                  <Audio src={staticFile(t.audio)} />
+                </Sequence>
+              )}
+              <Contenido inicios={t.inicios} beats={t.beats} />
+              <Subtitulos beats={t.beats} inicios={t.inicios} />
             </Transicion>
           </Sequence>
         );
