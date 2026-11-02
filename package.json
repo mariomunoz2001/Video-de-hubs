@@ -10,6 +10,7 @@
     "todos": "tsx scripts/todos.ts",
     "producto": "tsx scripts/producto.ts",
     "estudio": "tsx scripts/estudio.ts",
+    "analisis": "tsx scripts/analisis.ts",
     "tipos": "tsc --noEmit"
   },
   "dependencies": {

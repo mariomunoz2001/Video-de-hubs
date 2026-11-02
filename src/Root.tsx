@@ -4,6 +4,8 @@ import {Video} from './Video';
 import {DURACION_TOTAL, FPS, HEIGHT, WIDTH} from './theme';
 import {DURACION_PRODUCTO, Producto} from './producto/Producto';
 import {Carrusel, duracionCarrusel} from './carrusel/Carrusel';
+import {Analisis} from './analisis/Analisis';
+import {DURACION_ANALISIS} from './analisis/guion';
 import type {CarruselProps, ProductoProps, PromoProps} from './types';
 
 // Valores de ejemplo solo para abrir la plantilla sin props. El render real los recibe desde scripts/render.ts.
@@ -40,5 +42,6 @@ export const Root: React.FC = () => (
   />
   <Composition id="Producto" component={Producto} width={WIDTH} height={HEIGHT} fps={FPS} durationInFrames={DURACION_PRODUCTO} defaultProps={ejemploProducto} />
   <Composition id="Carrusel" component={Carrusel} width={WIDTH} height={HEIGHT} fps={FPS} durationInFrames={duracionCarrusel(8)} defaultProps={ejemploCarrusel} calculateMetadata={({props}) => ({durationInFrames: duracionCarrusel(props.items.length)})} />
+  <Composition id="Analisis" component={Analisis} width={WIDTH} height={HEIGHT} fps={FPS} durationInFrames={DURACION_ANALISIS} />
   </>
 );

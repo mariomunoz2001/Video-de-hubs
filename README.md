@@ -84,3 +84,12 @@ Ejemplo: `productos/laonce-clasic.json`. La hamburguesa es una ilustración en c
 ### Plantilla "carrusel" (menú con dedo que toca y desliza)
 
 Si el JSON lleva `"plantilla": "carrusel"`, `npm run producto -- <slug>` renderiza un carrusel de tarjetas de productos sobre fondo topográfico. Un dedo ilustrado toca cada tarjeta y la desliza. Cierra con un texto grande y el logo. La duración se ajusta sola a la cantidad de `items` (1,33 s por producto). Ejemplo: `productos/laonce-carrusel.json` (fotos sacadas del menú de La Once GO).
+
+## Video de exposición: análisis de falla (láminas 9 a 11)
+
+Guion y tiempos en `src/analisis/guion.ts` (cada frase dispara su animación y su subtítulo); diseño en `src/analisis/Analisis.tsx`.
+
+```bash
+npm run analisis                 # → salida/analisis-fatiga.mp4 y salida/analisis-fatiga-whatsapp.mp4
+npm run analisis -- --frame=600  # cuadro suelto en .tmp/analisis/ para revisar
+```
